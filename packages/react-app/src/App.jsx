@@ -29,7 +29,7 @@ import externalContracts from "./contracts/external_contracts";
 // contracts
 import deployedContracts from "./contracts/hardhat_contracts.json";
 import { Transactor, Web3ModalSetup } from "./helpers";
-import { Home, ExampleUI, Hints, Subgraph } from "./views";
+import { Spheres, ExampleUI, Hints, Subgraph } from "./views";
 import { useStaticJsonRPC } from "./hooks";
 
 const { ethers } = require("ethers");
@@ -167,7 +167,7 @@ function App(props) {
   ]);
 
   // keep track of a variable from the contract in the local React state:
-  const purpose = useContractReader(readContracts, "YourContract", "purpose");
+  //const purpose = useContractReader(readContracts, "YourContract", "purpose");
 
   /*
   const addressFromENS = useResolveName(mainnetProvider, "austingriffith.eth");
@@ -280,7 +280,8 @@ function App(props) {
       <Switch>
         <Route exact path="/">
           {/* pass in any web3 props to this Home component. For example, yourLocalBalance */}
-          <Home yourLocalBalance={yourLocalBalance} readContracts={readContracts} />
+          <Spheres yourLocalBalance={yourLocalBalance} readContracts={readContracts} signer={userSigner} loadWeb3Modal={loadWeb3Modal}/>
+          
         </Route>
         <Route exact path="/debug">
           {/*
@@ -290,7 +291,7 @@ function App(props) {
             */}
 
           <Contract
-            name="YourContract"
+            name="Sphere"
             price={price}
             signer={userSigner}
             provider={localProvider}
@@ -318,7 +319,6 @@ function App(props) {
             tx={tx}
             writeContracts={writeContracts}
             readContracts={readContracts}
-            purpose={purpose}
           />
         </Route>
         <Route path="/mainnetdai">
