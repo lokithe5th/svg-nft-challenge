@@ -13,7 +13,7 @@ import { Button, Col, Menu, Row, List } from "antd";
 function Spheres({ yourLocalBalance, readContracts, signer, loadWeb3Modal }) {
   // you can also use hooks locally in your component of choice
   // in this case, let's keep track of 'purpose' variable from our contract
-  //const Spheres = useContractReader(readContracts, "Spheres", "");
+  const Spheres = useContractReader(readContracts, "Sphere", "");
 
   return (
     <div>
@@ -44,7 +44,7 @@ function Spheres({ yourLocalBalance, readContracts, signer, loadWeb3Modal }) {
                           </div>
                         }
                       >
-                        <a href={"https://opensea.io/assets/"+(readContracts && readContracts.YourCollectible && readContracts.YourCollectible.address)+"/"+item.id} target="_blank">
+                        <a href={"https://opensea.io/assets/"+(readContracts && readContracts.Sphere && readContracts.Sphere.address)+"/"+item.id} target="_blank">
                         <img src={item.image} />
                         </a>
                         <div>{item.description}</div>

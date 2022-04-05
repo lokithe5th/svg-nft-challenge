@@ -27,8 +27,11 @@ contract Sphere is ERC721, Ownable {
     // RELEASE THE LOOGIES!
   }
 
+
+  /// The color of the sphere determines it's recharge rate
   mapping (uint256 => bytes3) public color;
-  mapping (uint256 => uint256) public chubbiness;
+  /// The energy represents the radiated energy
+  mapping (uint256 => uint256) public energy;
 
   uint256 mintDeadline = block.timestamp + 24 hours;
 
@@ -44,15 +47,15 @@ contract Sphere is ERC721, Ownable {
 
       bytes32 predictableRandom = keccak256(abi.encodePacked( blockhash(block.number-1), msg.sender, address(this) ));
       color[id] = bytes2(predictableRandom[0]) | ( bytes2(predictableRandom[1]) >> 8 ) | ( bytes3(predictableRandom[2]) >> 16 );
-      chubbiness[id] = 35+((55*uint256(uint8(predictableRandom[3])))/255);
+      energy[id] = 35+((55*uint256(uint8(predictableRandom[3])))/255);
 
       return id;
   }
 
   function tokenURI(uint256 id) public view override returns (string memory) {
       require(_exists(id), "not exist");
-      string memory name = string(abi.encodePacked('Loogie #',id.toString()));
-      string memory description = string(abi.encodePacked('This Loogie is the color #',color[id].toColor(),' with a chubbiness of ',uint2str(chubbiness[id]),'!!!'));
+      string memory name = string(abi.encodePacked('Sphere #',id.toString()));
+      string memory description = string(abi.encodePacked('This Sphere is the color #',color[id].toColor(),' with a energy capacity of ',uint2str(energy[id]),'!!!'));
       string memory image = Base64.encode(bytes(generateSVGofTokenById(id)));
 
       return
@@ -70,8 +73,8 @@ contract Sphere is ERC721, Ownable {
                               id.toString(),
                               '", "attributes": [{"trait_type": "color", "value": "#',
                               color[id].toColor(),
-                              '"},{"trait_type": "shield", "value": ',
-                              uint2str(chubbiness[id]),
+                              '"},{"trait_type": "energy", "value": ',
+                              uint2str(energy[id]),
                               '}], "owner":"',
                               (uint160(ownerOf(id))).toHexString(20),
                               '", "image": "',
