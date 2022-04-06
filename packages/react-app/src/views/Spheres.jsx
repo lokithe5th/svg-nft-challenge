@@ -1,8 +1,12 @@
 import { useContractReader } from "eth-hooks";
 import { ethers } from "ethers";
-import React from "react";
+import React, {useState} from "react";
 import { Link } from "react-router-dom";
-import { Button, Col, Menu, Row, List } from "antd";
+import { Button, Col, Menu, Row, List, Card } from "antd";
+import {
+  Address,
+  AddressInput
+} from "../components";
 
 /**
  * web3 props can be passed from '../App.jsx' into your local view component for use
@@ -10,10 +14,13 @@ import { Button, Col, Menu, Row, List } from "antd";
  * @param {*} readContracts contracts from current chain already pre-loaded using ethers contract module. More here https://docs.ethers.io/v5/api/contract/contract/
  * @returns react component
  **/
-function Spheres({ yourLocalBalance, readContracts, signer, loadWeb3Modal }) {
+function Spheres({ yourLocalBalance, readContracts, signer, loadWeb3Modal, tx, writeContracts, mainnetProvider, blockExplorer }) {
   // you can also use hooks locally in your component of choice
   // in this case, let's keep track of 'purpose' variable from our contract
   const Spheres = useContractReader(readContracts, "Sphere", "");
+
+  const [transferToAddresses, setTransferToAddresses] = useState();
+  const [address, setAddress] = useState();
 
   return (
     <div>

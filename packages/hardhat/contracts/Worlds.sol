@@ -253,9 +253,8 @@ contract Worlds is ERC721, Ownable {
   }
 
   function generateSVGofTokenById(uint256 id) internal view returns (string memory) {
-
-    string memory svg = string(abi.encodePacked(
-           require(_exists(id), "not exist");
+    require(_exists(id), "not exist");
+    //string memory svg = string(abi.encodePacked(
       //string memory name = string(abi.encodePacked('World #',id.toString()));
       //string memory description = string(abi.encodePacked('This Sphere is the color #',color[id].toColor(),' with a energy capacity of ',uint2str(energy[id]),'!!!'));
       //string memory image = Base64.encode(bytes(generateSVGofTokenById(id)));
@@ -294,8 +293,7 @@ contract Worlds is ERC721, Ownable {
         parts[15] = '</text></svg>';
 
         string memory svg = string(abi.encodePacked(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]));
-        svg = string(abi.encodePacked(output, parts[9], parts[10], parts[11], parts[12], parts[13], parts[14], parts[15]));
-    ));
+        svg = string(abi.encodePacked(svg, parts[9], parts[10], parts[11], parts[12], parts[13], parts[14], parts[15]));
 
     return svg;
   }

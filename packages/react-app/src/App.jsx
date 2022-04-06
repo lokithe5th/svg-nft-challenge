@@ -280,7 +280,16 @@ function App(props) {
       <Switch>
         <Route exact path="/">
           {/* pass in any web3 props to this Home component. For example, yourLocalBalance */}
-          <Spheres yourLocalBalance={yourLocalBalance} readContracts={readContracts} signer={userSigner} loadWeb3Modal={loadWeb3Modal}/>
+          <Spheres 
+            yourLocalBalance={yourLocalBalance} 
+            readContracts={readContracts} 
+            signer={userSigner} 
+            loadWeb3Modal={loadWeb3Modal}
+            tx={tx} 
+            writeContracts={writeContracts} 
+            mainnetProvider={mainnetProvider}
+            blockExplorer={blockExplorer} 
+            />
           
         </Route>
         <Route exact path="/debug">
