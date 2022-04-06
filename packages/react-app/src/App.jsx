@@ -291,7 +291,7 @@ function App(props) {
             */}
 
           <Contract
-            name="Sphere"
+            name="Worlds"
             price={price}
             signer={userSigner}
             provider={localProvider}
