@@ -1,4 +1,4 @@
-import { Button, Col, Menu, Row } from "antd";
+import { Button, Card, Col, List, Menu, Row } from "antd";
 import "antd/dist/antd.css";
 import {
   useBalance,
@@ -14,6 +14,8 @@ import { Link, Route, Switch, useLocation } from "react-router-dom";
 import "./App.css";
 import {
   Account,
+  Address,
+  AddressInput,
   Contract,
   Faucet,
   GasGauge,
@@ -173,7 +175,50 @@ function App(props) {
   const addressFromENS = useResolveName(mainnetProvider, "austingriffith.eth");
   console.log("🏷 Resolved austingriffith.eth as:",addressFromENS)
   */
+  console.log("Address is "+address);
+  console.log("Readcontract is "+readContracts);
 
+  
+  const balance = useContractReader(readContracts, "Worlds", "balanceOf", [address]);
+  console.log("🤗 balance:", balance);
+  const yourBalance = balance && balance.toNumber && balance.toNumber();
+  console.log(yourBalance);
+  const [yourCollectibles, setYourCollectibles] = useState();
+
+  useEffect(() => {
+    const updateYourCollectibles = async () => {
+      const collectibleUpdate = [];
+      for (let tokenIndex = 0; tokenIndex < yourBalance; tokenIndex++) {
+        console.log("trying token" + tokenIndex);
+        try {
+          console.log("Getting token index", tokenIndex);
+          const tokenId = tokenIndex+1;
+          console.log("tokenId", tokenId);
+          const tokenURI = await readContracts.Worlds.tokenURI(tokenId);
+          console.log("TokenURI " +tokenURI.substring(29));
+          const jsonManifestString = atob(tokenURI.substring(29))
+          console.log("jsonManifestString", jsonManifestString);
+/*
+          const ipfsHash = tokenURI.replace("https://ipfs.io/ipfs/", "");
+          console.log("ipfsHash", ipfsHash);
+          const jsonManifestBuffer = await getFromIPFS(ipfsHash);
+        */
+          try {
+            const jsonManifest = JSON.parse(jsonManifestString);
+            console.log("jsonManifest", jsonManifest);
+            collectibleUpdate.push({ id: tokenId, uri: tokenURI, owner: address, ...jsonManifest });
+          } catch (e) {
+            console.log(e);
+          }
+
+        } catch (e) {
+          console.log(e);
+        }
+      }
+      setYourCollectibles(collectibleUpdate.reverse());
+    };
+    updateYourCollectibles();
+  }, [address, yourBalance]);
   //
   // 🧫 DEBUG 👨🏻‍🔬
   //
@@ -214,6 +259,7 @@ function App(props) {
     myMainnetDAIBalance,
   ]);
 
+
   const loadWeb3Modal = useCallback(async () => {
     const provider = await web3Modal.connect();
     setInjectedProvider(new ethers.providers.Web3Provider(provider));
@@ -242,7 +288,19 @@ function App(props) {
     }
   }, [loadWeb3Modal]);
 
+  const [sending, setSending] = useState();
+  const [ipfsHash, setIpfsHash] = useState();
+  const [ipfsDownHash, setIpfsDownHash] = useState();
+
+  const [downloading, setDownloading] = useState();
+  const [ipfsContent, setIpfsContent] = useState();
+
+  const [transferToAddresses, setTransferToAddresses] = useState({});
+
+  const [loadedAssets, setLoadedAssets] = useState();
+
   const faucetAvailable = localProvider && localProvider.connection && targetNetwork.name.indexOf("local") !== -1;
+  console.log(yourCollectibles);
 
   return (
     <div className="App">
@@ -280,16 +338,73 @@ function App(props) {
       <Switch>
         <Route exact path="/">
           {/* pass in any web3 props to this Home component. For example, yourLocalBalance */}
-          <Spheres 
-            yourLocalBalance={yourLocalBalance} 
-            readContracts={readContracts} 
-            signer={userSigner} 
-            loadWeb3Modal={loadWeb3Modal}
-            tx={tx} 
-            writeContracts={writeContracts} 
-            mainnetProvider={mainnetProvider}
-            blockExplorer={blockExplorer} 
-            />
+          <div style={{ maxWidth: 820, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
+              {userSigner?(
+                <Button type={"primary"} onClick={()=>{
+                  tx( writeContracts.Worlds.mintItem(), {value: utils.parseEther("0.05")})
+                }}>MINT</Button>
+              ):(
+                <Button type={"primary"} onClick={loadWeb3Modal}>CONNECT WALLET</Button>
+              )}
+
+            </div>
+            
+            <div style={{ width: 820, margin: "auto", paddingBottom: 256 }}>
+              <List
+                bordered
+                dataSource={yourCollectibles}
+                renderItem={item => {
+                  const id = item.id;
+
+                  console.log("IMAGE",item.image)
+
+                  return (
+                    <List.Item key={id + "_" + item.uri + "_" + item.owner}>
+                      <Card
+                        title={
+                          <div>
+                            <span style={{ fontSize: 18, marginRight: 8 }}>{item.name}</span>
+                          </div>
+                        }
+                      >
+                        <a href={"https://opensea.io/assets/"+(readContracts && readContracts.Worlds && readContracts.Worlds.address)+"/"+item.id} target="_blank">
+                        <img src={item.image} />
+                        </a>
+                        <div>{item.description}</div>
+                      </Card>
+
+                      <div>
+                        owner:{" "}
+                        <Address
+                          address={item.owner}
+                          ensProvider={mainnetProvider}
+                          blockExplorer={blockExplorer}
+                          fontSize={16}
+                        />
+                        <AddressInput
+                          ensProvider={mainnetProvider}
+                          placeholder="transfer to address"
+                          value={transferToAddresses[id]}
+                          onChange={newValue => {
+                            const update = {};
+                            update[id] = newValue;
+                            setTransferToAddresses({ ...transferToAddresses, ...update });
+                          }}
+                        />
+                        <Button
+                          onClick={() => {
+                            console.log("writeContracts", writeContracts);
+                            tx(writeContracts.Worlds.transferFrom(address, transferToAddresses[id], id));
+                          }}
+                        >
+                          Transfer
+                        </Button>
+                      </div>
+                    </List.Item>
+                  );
+                }}
+              />
+            </div>
           
         </Route>
         <Route exact path="/debug">
