@@ -26,7 +26,18 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   });
 
   // Getting a previously deployed contract
-  const Sphere = await ethers.getContract("Worlds", deployer);
+  const Worlds = await ethers.getContract("Worlds", deployer);
+
+  await deploy("EnergyToken", {
+    // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
+    from: deployer,
+    args: [ Worlds.address ],
+    log: true,
+    waitConfirmations: 5,
+  });
+
+  // Getting a previously deployed contract
+  const EnergyToken = await ethers.getContract("EnergyToken", deployer);
   /*  await YourContract.setPurpose("Hello");
   
     To take ownership of yourContract using the ownable library uncomment next line and add the 

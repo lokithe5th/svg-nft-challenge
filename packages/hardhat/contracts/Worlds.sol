@@ -1,3 +1,7 @@
+/// @title    Worlds SVG NFTs: Searching for energy in this NFT universe!
+/// @author   @lourenslinde || lourens.eth
+/// @notice   This contract controls the "Worlds" NFT collection and associated token actions
+/// @dev      The contract is a gas-efficient implementation of ERC721 standards
 pragma solidity >=0.8.0 <0.9.0;
 //SPDX-License-Identifier: MIT
 
@@ -10,9 +14,6 @@ import 'base64-sol/base64.sol';
 
 import './HexStrings.sol';
 import './ToColor.sol';
-//learn more: https://docs.openzeppelin.com/contracts/3.x/erc721
-
-// GET LISTED ON OPENSEA: https://testnets.opensea.io/get-listed/step-two
 
 contract Worlds is ERC721, Ownable {
 
@@ -23,20 +24,25 @@ contract Worlds is ERC721, Ownable {
   Counters.Counter private _tokenIds;
 
   uint256 private mintDeadline;
+  //  The associated token for rewards
   IERC20 private energyToken;
+  //  The contract controlled tokenPrice
+  //  This is an incentive mechanism
   uint256 private tokenPrice;
+  //  Tracking if the energyToken has been set yet
+  bool private init;
 
   constructor() ERC721("Worlds", "WORLDS") {
-      // Incrementing _tokenIds in the constructor lowers gas costs for the first mint
-      _tokenIds.increment();
-      mintDeadline = block.timestamp + 24 hours;
-    // 
+    // Incrementing _tokenIds in the constructor lowers gas costs for the first mint
+    _tokenIds.increment();
+    mintDeadline = block.timestamp + 24 hours;
   }
 
 
-  /// Mapping of tokenId to rand used to generate properties
+  // Mapping of tokenId to rand used to generate properties
   mapping (uint256 => bytes32) public properties;
 
+  // Mapping of tokenId to timestamp of last token claim. Upon claiming tokens the timer is reset
   mapping (uint256 => uint256) private lastExtraction;
 
   /// The array of different climates a planet might have
@@ -47,6 +53,7 @@ contract Worlds is ERC721, Ownable {
     "Jungle"
   ];
 
+  //  Climate modifiers to increase variety and rarity of climates
   string[] private climateModifiers = [
     "Inhospitable",
     "Hostile",
@@ -54,17 +61,20 @@ contract Worlds is ERC721, Ownable {
     "Radioactive"
   ];
 
+  //  Resource modifiers to increase variety and rarity of climates
   string[] private resourceModifiers = [
     "Concealed",
     "Artificial",
     "Multiplicative"
   ];
 
-    string[] private atmosphereModifiers = [
+  //  Atmosphere modifiers to increase variety and rarity of atmospheres
+  string[] private atmosphereModifiers = [
     "Nourishing",
     "Corrosive"
   ];
 
+  //  Base resources found on planet
   string[] private resources = [
     "Iron",
     "Copper",
@@ -76,6 +86,7 @@ contract Worlds is ERC721, Ownable {
     "Uranium"
   ];
 
+  //  Artifact available on planet
   string[] private artifact = [
     "Miner",
     "Terraformer",
@@ -86,6 +97,7 @@ contract Worlds is ERC721, Ownable {
     "Drone Factory"
   ];
 
+  //  Type of atmosphere that is dominant ion planet
   string[] private atmosphere = [
     "Oxygen",
     "Nitrogen",
@@ -93,6 +105,7 @@ contract Worlds is ERC721, Ownable {
     "Helium"
   ];
 
+  //  Mysterious object close to world. What is it's purpose?
   string[] private object = [
     "Excession",
     "Moon",
@@ -103,6 +116,7 @@ contract Worlds is ERC721, Ownable {
     "Fabrication Hub"
   ];
 
+  //  These ancient and powerful civilizations may leave powerful versions of their technologies
   string[] private named = [
     "Elder",
     "Hive",
@@ -110,6 +124,7 @@ contract Worlds is ERC721, Ownable {
     "Augmented"
   ];
 
+  //  Some technologies are so advanced as to seem like magic
   string[] private suffixes = [
     "of the DAO",
     "of the Queen",
@@ -120,7 +135,24 @@ contract Worlds is ERC721, Ownable {
     "of empowerment"
   ];
 
+  /// @notice   Initializes the associated Energy Token
+  /// @dev      Takes an ERC20 token address and sets the energyToken variable
+  /// @param    tokenAddress:address of the Energy Token
+  /// @return   bool: was init succesful? If false make sure it is an ERC20 token!
+  function initToken(address tokenAddress) external returns (bool) {
+    require(!init,"Energy stream already initialized.");
+    energyToken = IERC20(tokenAddress);
+    init = true;
+    return init;
+  }
+
+  /// @notice Explain to an end user what this does
+  /// @dev Explain to a developer any extra details
+  /// @param to:address a parameter just like in doxygen (must be followed by parameter name)
+  /// @param tokenId:uint256
+  /// @return uint256 the return variables of a contract’s function state variable
   function claimTokens(address payable to, uint256 tokenId) external returns (uint256) {
+    require(!init,"Energy stream must be initiliazed first.");
     require(msg.sender == ownerOf(tokenId),"This world's energy is not yours to claim.");
     uint256 tokensClaimable = worldEnergy(tokenId);
     require(energyToken.transfer(to, tokensClaimable), "Energy transfer failed!");
@@ -134,6 +166,7 @@ contract Worlds is ERC721, Ownable {
     require(energyToken.transferFrom(msg.sender, address(this), amount));
     (bool sent, ) = to.call{value: totalEth}("");
     require(sent, "Failed to send Ether");
+    tokenPrice = tokenPrice + (tokenPrice*1/100);
     return totalEth;
   }
 
