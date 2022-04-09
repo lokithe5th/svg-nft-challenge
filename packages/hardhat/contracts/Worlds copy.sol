@@ -13,7 +13,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import 'base64-sol/base64.sol';
 import "./WorldLibrary.sol";
 
-contract Worlds is ERC721, Ownable, WorldLibrary {
+contract Worlds is ERC721, Ownable, WorldGenerator {
 
   using Strings for uint256;
   using Counters for Counters.Counter;
@@ -41,6 +41,12 @@ contract Worlds is ERC721, Ownable, WorldLibrary {
   // Mapping of tokenId to timestamp of last token claim. Upon claiming tokens the timer is reset
   mapping (uint256 => uint256) private lastExtraction;
 
+  
+
+  /// @notice   Initializes the associated Energy Token
+  /// @dev      Takes an ERC20 token address and sets the energyToken variable
+  /// @param    tokenAddress:address of the Energy Token
+  /// @return   bool: was init succesful? If false make sure it is an ERC20 token!
   function initToken(address tokenAddress) external returns (bool) {
     require(!init,"Energy stream already initialized.");
     energyToken = IERC20(tokenAddress);
@@ -48,6 +54,11 @@ contract Worlds is ERC721, Ownable, WorldLibrary {
     return init;
   }
 
+  /// @notice Allows a user to claim Energy tokens associated with a specific NFT
+  /// @dev    Transfers accrued Energy tokens to a user 
+  /// @param to:address An address where the tokens must be transferred to
+  /// @param tokenId:uint256  The tokenId of the Worlds NFT being claimed
+  /// @return uint256 The amount of Energy tokens claimed by the user
   function claimTokens(address payable to, uint256 tokenId) external returns (uint256) {
     require(!init,"Energy stream must be initiliazed first.");
     require(msg.sender == ownerOf(tokenId),"This world's energy is not yours to claim.");
@@ -71,104 +82,7 @@ contract Worlds is ERC721, Ownable, WorldLibrary {
  
  // }
 
-  function predictableRandom() internal view returns(bytes32) {
-    return keccak256(abi.encodePacked( blockhash(block.number-1), msg.sender, address(this) ));
-  } 
-
-  function getType(uint256 tokenId) internal view returns(string memory) {
-    return determineClimate(tokenId, "Climate", climates);
-  }
-
-  function getResource(uint256 tokenId) internal view returns(string memory) {
-    return determineResource(tokenId, "Resource", resources);
-  }
-
-  function getEnergyLevel(uint256 tokenId) internal pure returns(uint256) {
-    return (uint256(keccak256(abi.encodePacked(tokenId))) % 900) + 100;
-  }
-
-  function getSize(uint256 tokenId) internal view returns(uint256) {
-    return (uint256(keccak256(abi.encodePacked(properties[tokenId]))) % 9000) + 1000;
-  }
-
-  function getArtifact(uint256 tokenId) internal view returns(string memory) {
-    return determineProperty(tokenId, "Artifact", artifact);
-  }
-
-  function getAtmosphere(uint256 tokenId) internal view returns(string memory) {
-    return determineAtmosphere(tokenId, "Atmosphere", atmosphere);
-  }
-
-  function getObject(uint256 tokenId) internal view returns(string memory) {
-    return determineProperty(tokenId, "Object", object);
-  }  
-
-  function determineProperty(uint256 tokenId, string memory keyPrefix, string[] memory sourceArray) internal view returns (string memory) {
-        uint256 rand = uint256(keccak256(abi.encodePacked(keyPrefix, properties[tokenId])));
-        string memory output = sourceArray[rand % sourceArray.length];
-        uint256 greatness = rand % 21;
-        if (greatness > 14) {
-            output = string(abi.encodePacked(output, " ", suffixes[rand % suffixes.length]));
-        }
-        if (greatness >= 19) {
-            string[2] memory name;
-            name[0] = named[rand % named.length];
-            if (greatness == 19) {
-                output = string(abi.encodePacked('"', name[0], '', '" ', output));
-            } else {
-                output = string(abi.encodePacked('"', name[0], '', '" ', output, " +1"));
-            }
-        }
-        return output;
-    }
-
-  function determineClimate(uint256 tokenId, string memory keyPrefix, string[] memory sourceArray) internal view returns (string memory) {
-        uint256 rand = uint256(keccak256(abi.encodePacked(keyPrefix, properties[tokenId])));
-        string memory output = sourceArray[rand % sourceArray.length];
-        uint256 greatness = rand % 21;
-        if (greatness >= 19) {
-            string[2] memory name;
-            name[0] = climateModifiers[rand % climateModifiers.length];
-            if (greatness == 19) {
-                output = string(abi.encodePacked('"', name[0], '', '" ', output));
-            } else {
-                output = string(abi.encodePacked('"', name[0], '', '" ', output, " +1"));
-            }
-        }
-        return output;
-    }
-
-  function determineAtmosphere(uint256 tokenId, string memory keyPrefix, string[] memory sourceArray) internal view returns (string memory) {
-    uint256 rand = uint256(keccak256(abi.encodePacked(keyPrefix, properties[tokenId])));
-    string memory output = sourceArray[rand % sourceArray.length];
-    uint256 greatness = rand % 21;
-      if (greatness >= 19) {
-        string[2] memory name;
-        name[0] = atmosphereModifiers[rand % atmosphereModifiers.length];
-        if (greatness == 19) {
-          output = string(abi.encodePacked('"', name[0], '', '" ', output));
-        } else {
-          output = string(abi.encodePacked('"', name[0], '', '" ', output, " +1"));
-        }
-        }
-        return output;
-    }
-
-    function determineResource(uint256 tokenId, string memory keyPrefix, string[] memory sourceArray) internal view returns (string memory) {
-        uint256 rand = uint256(keccak256(abi.encodePacked(keyPrefix, properties[tokenId])));
-        string memory output = sourceArray[rand % sourceArray.length];
-        uint256 greatness = rand % 21;
-        if (greatness >= 19) {
-            string[2] memory name;
-            name[0] = resourceModifiers[rand % resourceModifiers.length];
-            if (greatness == 19) {
-                output = string(abi.encodePacked('"', name[0], '', '" ', output));
-            } else {
-                output = string(abi.encodePacked('"', name[0], '', '" ', output, " +1"));
-            }
-        }
-        return output;
-    }
+  
 
   function mintItem() public returns (uint256) {
     //require(msg.value >= 0.05 ether);
@@ -237,6 +151,11 @@ contract Worlds is ERC721, Ownable, WorldLibrary {
 
   function generateSVGofTokenById(uint256 id) internal view returns (string memory) {
     require(_exists(id), "not exist");
+    //string memory svg = string(abi.encodePacked(
+      //string memory name = string(abi.encodePacked('World #',id.toString()));
+      //string memory description = string(abi.encodePacked('This Sphere is the color #',color[id].toColor(),' with a energy capacity of ',uint2str(energy[id]),'!!!'));
+      //string memory image = Base64.encode(bytes(generateSVGofTokenById(id)));
+
       string[18] memory parts;
         parts[0] = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350"><style>.base { fill: white; font-family: monospace; font-size: 14px; }</style><rect width="100%" height="100%" fill="black" /><text x="10" y="20" class="base">';
 
