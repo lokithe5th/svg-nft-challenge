@@ -180,22 +180,24 @@ function App(props) {
 
   
   const balance = useContractReader(readContracts, "Worlds", "balanceOf", [address]);
-  console.log("🤗 balance:", balance);
+  const totalSupplyBig = useContractReader(readContracts, "Worlds", "totalSupply", []);
+  const totalSupply = totalSupplyBig && totalSupplyBig.toNumber && totalSupplyBig.toNumber();
+  console.log("🤗 totalSupply:", totalSupply);
   const yourBalance = balance && balance.toNumber && balance.toNumber();
   console.log(yourBalance);
+
   const [yourCollectibles, setYourCollectibles] = useState();
 
   useEffect(() => {
     const updateYourCollectibles = async () => {
       const collectibleUpdate = [];
-      for (let tokenIndex = 0; tokenIndex < yourBalance; tokenIndex++) {
-        console.log("trying token" + tokenIndex);
+      for (let tokenIndex = 0; tokenIndex < totalSupply; tokenIndex++) {
         try {
-          console.log("Getting token index", tokenIndex);
-          const tokenId = tokenIndex+1;
-          console.log("tokenId", tokenId);
+          console.log("GEtting token index", tokenIndex);
+          const tokenId = await readContracts.Worlds.tokenOfOwnerByIndex(address, tokenIndex);
+          const testId = tokenId && balance.toNumber && balance.toNumber();
+          console.log("tokenId", testId);
           const tokenURI = await readContracts.Worlds.tokenURI(tokenId);
-          console.log("TokenURI " +tokenURI.substring(29));
           const jsonManifestString = atob(tokenURI.substring(29))
           console.log("jsonManifestString", jsonManifestString);
 /*
@@ -206,7 +208,8 @@ function App(props) {
           try {
             const jsonManifest = JSON.parse(jsonManifestString);
             console.log("jsonManifest", jsonManifest);
-            collectibleUpdate.push({ id: tokenId, uri: tokenURI, owner: address, ...jsonManifest });
+            collectibleUpdate.push({ id: testId, uri: tokenURI, owner: address, ...jsonManifest });
+            console.log({id: testId, uri: tokenURI, owner: address, ...jsonManifest});
           } catch (e) {
             console.log(e);
           }
@@ -300,7 +303,7 @@ function App(props) {
   const [loadedAssets, setLoadedAssets] = useState();
 
   const faucetAvailable = localProvider && localProvider.connection && targetNetwork.name.indexOf("local") !== -1;
-  console.log(yourCollectibles);
+  //console.log(yourCollectibles);
 
   return (
     <div className="App">
@@ -338,10 +341,10 @@ function App(props) {
       <Switch>
         <Route exact path="/">
           {/* pass in any web3 props to this Home component. For example, yourLocalBalance */}
-          <div style={{ maxWidth: 820, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
+          <div style={{ maxWidth: 850, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
               {userSigner?(
                 <Button type={"primary"} onClick={()=>{
-                  tx( writeContracts.Worlds.mintItem(), {value: utils.parseEther("0.05")})
+                  tx( writeContracts.Worlds.mintItem({ value: 1*10**15, gasLimit: 3*10**7}))
                 }}>MINT</Button>
               ):(
                 <Button type={"primary"} onClick={loadWeb3Modal}>CONNECT WALLET</Button>
@@ -349,7 +352,7 @@ function App(props) {
 
             </div>
             
-            <div style={{ width: 820, margin: "auto", paddingBottom: 256 }}>
+            <div style={{ alignContent:"center", width: 650, margin: "auto", paddingBottom: 256 }}>
               <List
                 bordered
                 dataSource={yourCollectibles}
@@ -368,12 +371,10 @@ function App(props) {
                         }
                       >
                         <a href={"https://opensea.io/assets/"+(readContracts && readContracts.Worlds && readContracts.Worlds.address)+"/"+item.id} target="_blank">
-                        <img src={item.image} />
+                        <img width={350} height={350} src={item.image} />
                         </a>
                         <div>{item.description}</div>
-                      </Card>
-
-                      <div>
+                        <div>
                         owner:{" "}
                         <Address
                           address={item.owner}
@@ -381,7 +382,7 @@ function App(props) {
                           blockExplorer={blockExplorer}
                           fontSize={16}
                         />
-                        <AddressInput
+                        {/*<AddressInput
                           ensProvider={mainnetProvider}
                           placeholder="transfer to address"
                           value={transferToAddresses[id]}
@@ -398,8 +399,20 @@ function App(props) {
                           }}
                         >
                           Transfer
+                        </Button> */}</div>
+                        <div>
+                        <Button
+                          onClick={() => {
+                            console.log("writeContracts", writeContracts);
+                            tx(writeContracts.Worlds.claimTokens(address, id));
+                          }}
+                        >
+                          Claim Energy
                         </Button>
-                      </div>
+                        </div>
+                      </Card>
+
+                      
                     </List.Item>
                   );
                 }}
@@ -416,6 +429,15 @@ function App(props) {
 
           <Contract
             name="Worlds"
+            price={price}
+            signer={userSigner}
+            provider={localProvider}
+            address={address}
+            blockExplorer={blockExplorer}
+            contractConfig={contractConfig}
+          />
+          <Contract
+            name="EnergyToken"
             price={price}
             signer={userSigner}
             provider={localProvider}

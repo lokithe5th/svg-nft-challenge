@@ -593,7 +593,7 @@ task("send", "Send ETH")
         taskArgs.gasPrice ? taskArgs.gasPrice : "1.001",
         "gwei"
       ).toHexString(),
-      gasLimit: taskArgs.gasLimit ? taskArgs.gasLimit : 24000,
+      gasLimit: taskArgs.gasLimit ? taskArgs.gasLimit : 240000,
       chainId: network.config.chainId,
     };
 
