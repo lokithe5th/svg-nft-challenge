@@ -1,4 +1,4 @@
-import { Button, Card, CardGroup, Col, List, Menu, Row } from "antd";
+import { Button, Card, CardGroup, Col, List, Menu, Row, Typography } from "antd";
 import "antd/dist/antd.css";
 import {
   useBalance,
@@ -308,6 +308,7 @@ function App(props) {
     width: '25%',
     textAlign: 'center',
   }
+  const mintprice = 5*10**16;
   //console.log(yourCollectibles);
 
   return (
@@ -335,28 +336,38 @@ function App(props) {
         <Route exact path="/">
           {/* pass in any web3 props to this Home component. For example, yourLocalBalance */}
           <div style={{ maxWidth: 850, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
+              <Typography>Each NFT corresponds to a new world in a finite universe; each with it's own resources and attributes. Drawn to the abundance of new energy
+                you have been cast into this void by your masters.
+              </Typography>
+              <Typography>
+                The values of the world correspond to: terrain type, the resource available, size, energy stream, structures, atmosphere, artifact and the energy accrued.
+              </Typography>
+            </div>
+          <div style={{ maxWidth: 850, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
               {userSigner?(
                 <Button type={"primary"} onClick={()=>{
-                  tx( writeContracts.Worlds.mintItem({ value: 1*10**15, gasLimit: 3*10**7}))
-                }}>MINT</Button>
+                  tx( writeContracts.Worlds.mintItem({ value: mintprice.toString(), gasLimit: 3*10**7}))
+                }}>MINT FOR 0.05 ETHER</Button>
               ):(
                 <Button type={"primary"} onClick={loadWeb3Modal}>CONNECT WALLET</Button>
               )}
 
             </div>
             
-            <div >
-              <Row gutter={8}><List
+            
+              <List
+                grid={{ gutter: 16, column: 3 }}
                 bordered
                 dataSource={yourCollectibles}
                 renderItem={item => {
                   const id = item.id;
+                  const tokenId = item.tokenId;
 
                   console.log("IMAGE",item.image)
-                  console.log("IMAGE", {item})
+                  console.log("Data", tokenId)
 
                   return (
-                    <Col span={8}><List.Item key={id + "_" + item.uri + "_" + item.owner}>
+                    <List.Item key={id + "_" + item.uri + "_" + item.owner}>
                       <Card
                         title={
                           <div>
@@ -380,7 +391,7 @@ function App(props) {
                         <Button
                           onClick={() => {
                             console.log("writeContracts", writeContracts);
-                            tx(writeContracts.Worlds.claimTokens(address, id));
+                            tx(writeContracts.Worlds.claimTokens(address, tokenId));
                           }}
                         >
                           Claim Energy
@@ -389,11 +400,11 @@ function App(props) {
                       </Card>
 
                       
-                    </List.Item></Col>
+                    </List.Item>
                   );
                 }}
-              /></Row>
-            </div>
+              />
+          
           
         </Route>
         <Route exact path="/debug">

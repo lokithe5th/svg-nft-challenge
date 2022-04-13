@@ -23,14 +23,11 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator {
   uint256 private mintDeadline;
   //  The associated token for rewards
   IERC20 private energyToken;
-  //  The contract controlled tokenPrice
-  //  This is an incentive mechanism
-  uint256 private tokenPrice;
   //  Tracking if the energyToken has been set yet
   bool private init;
 
   constructor() ERC721("Worlds", "WORLDS") {
-    // Incrementing _tokenIds in the constructor lowers gas costs for the first mint
+
     mintDeadline = block.timestamp + 24 hours;
   }
 
@@ -41,7 +38,6 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator {
     require(!init,"Energy stream already initialized.");
     energyToken = IERC20(tokenAddress);
     init = true;
-    tokenPrice = energyToken.balanceOf(address(this));
     return init;
   }
 
@@ -55,8 +51,8 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator {
   }
 
   function mintItem() public payable returns (uint256) {
-    require(msg.value >= 0.001 ether);
-    require( block.timestamp < mintDeadline, "DONE MINTING");
+    require(msg.value >= 0.05 ether, "Not that cheap!");
+    require(_tokenIds.current() < 64, "Supply cap reached.");
 
     bytes32 rand = predictableRandom();
     uint256 id = _tokenIds.current();
@@ -71,12 +67,12 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator {
 
   function tokenURI(uint256 id) public view override returns (string memory) {
       require(_exists(id), "not exist");
-      string memory description = ">>>spoolingSentience...succes";
+      string memory description = ">>>spoolingSentience...success";
       string memory output = generateSVGofTokenById(id);
 
       string memory json = Base64.encode(
         bytes(string(abi.encodePacked(
-          '{"name": "World #', uint2str(id), '", "description":"', description,'", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(output)), '"}'))));
+          '{"name": "World #', uint2str(id), '", "tokenId": ',uint2str(id),', "description":"', description,'", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(output)), '"}'))));
 
         output = string(abi.encodePacked('data:application/json;base64,', json));
       return output;
