@@ -345,17 +345,18 @@ function App(props) {
 
             </div>
             
-            <div style={{ alignContent:"center", width: 650, margin: "auto", paddingBottom: 256 }}>
-              <List
+            <div >
+              <Row gutter={8}><List
                 bordered
                 dataSource={yourCollectibles}
                 renderItem={item => {
                   const id = item.id;
 
                   console.log("IMAGE",item.image)
+                  console.log("IMAGE", {item})
 
                   return (
-                    <List.Item key={id + "_" + item.uri + "_" + item.owner}>
+                    <Col span={8}><List.Item key={id + "_" + item.uri + "_" + item.owner}>
                       <Card
                         title={
                           <div>
@@ -364,7 +365,7 @@ function App(props) {
                         }
                       >
                         <a href={"https://opensea.io/assets/"+(readContracts && readContracts.Worlds && readContracts.Worlds.address)+"/"+item.id} target="_blank">
-                        <img width={500} height={500} src={item.image} />
+                        <img width={350} height={350} src={item.image} />
                         </a>
                         <div>{item.description}</div>
                         <div>
@@ -388,10 +389,10 @@ function App(props) {
                       </Card>
 
                       
-                    </List.Item>
+                    </List.Item></Col>
                   );
                 }}
-              />
+              /></Row>
             </div>
           
         </Route>
