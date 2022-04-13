@@ -1,4 +1,8 @@
 .App {
   text-align: center;
   padding-left: calc(100vw - 100%);
+  background: linear-gradient(-45deg, #ffffff, #ffffff, #a0a0a0, #d8d8d8);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
 }
+

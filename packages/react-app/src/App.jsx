@@ -1,4 +1,4 @@
-import { Button, Card, Col, List, Menu, Row } from "antd";
+import { Button, Card, CardGroup, Col, List, Menu, Row } from "antd";
 import "antd/dist/antd.css";
 import {
   useBalance,
@@ -303,6 +303,11 @@ function App(props) {
   const [loadedAssets, setLoadedAssets] = useState();
 
   const faucetAvailable = localProvider && localProvider.connection && targetNetwork.name.indexOf("local") !== -1;
+
+  const gridStyle = {
+    width: '25%',
+    textAlign: 'center',
+  }
   //console.log(yourCollectibles);
 
   return (
@@ -323,18 +328,6 @@ function App(props) {
         </Menu.Item>
         <Menu.Item key="/debug">
           <Link to="/debug">Debug Contracts</Link>
-        </Menu.Item>
-        <Menu.Item key="/hints">
-          <Link to="/hints">Hints</Link>
-        </Menu.Item>
-        <Menu.Item key="/exampleui">
-          <Link to="/exampleui">ExampleUI</Link>
-        </Menu.Item>
-        <Menu.Item key="/mainnetdai">
-          <Link to="/mainnetdai">Mainnet DAI</Link>
-        </Menu.Item>
-        <Menu.Item key="/subgraph">
-          <Link to="/subgraph">Subgraph</Link>
         </Menu.Item>
       </Menu>
 
@@ -371,7 +364,7 @@ function App(props) {
                         }
                       >
                         <a href={"https://opensea.io/assets/"+(readContracts && readContracts.Worlds && readContracts.Worlds.address)+"/"+item.id} target="_blank">
-                        <img width={350} height={350} src={item.image} />
+                        <img width={500} height={500} src={item.image} />
                         </a>
                         <div>{item.description}</div>
                         <div>
@@ -381,25 +374,7 @@ function App(props) {
                           ensProvider={mainnetProvider}
                           blockExplorer={blockExplorer}
                           fontSize={16}
-                        />
-                        {/*<AddressInput
-                          ensProvider={mainnetProvider}
-                          placeholder="transfer to address"
-                          value={transferToAddresses[id]}
-                          onChange={newValue => {
-                            const update = {};
-                            update[id] = newValue;
-                            setTransferToAddresses({ ...transferToAddresses, ...update });
-                          }}
-                        />
-                        <Button
-                          onClick={() => {
-                            console.log("writeContracts", writeContracts);
-                            tx(writeContracts.Worlds.transferFrom(address, transferToAddresses[id], id));
-                          }}
-                        >
-                          Transfer
-                        </Button> */}</div>
+                        /></div>
                         <div>
                         <Button
                           onClick={() => {
