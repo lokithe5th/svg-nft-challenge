@@ -21,9 +21,7 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator {
   Counters.Counter private _tokenIds;
 
   uint256 private mintDeadline;
-  //  The associated token for rewards
   IERC20 private energyToken;
-  //  Tracking if the energyToken has been set yet
   bool private init;
 
   constructor() ERC721("Worlds", "WORLDS") {
@@ -156,4 +154,9 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator {
       }
       return string(bstr);
   }
+
+  receive() payable external {}
+
+  fallback() payable external {}
+
 }
