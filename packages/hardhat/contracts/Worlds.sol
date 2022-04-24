@@ -1,7 +1,7 @@
 /// @title    Worlds SVG NFTs: Searching for energy in this NFT universe!
 /// @author   @lourenslinde || lourens.eth
 /// @notice   This contract controls the "Worlds" NFT collection and associated token actions
-/// @dev      The contract is a gas-efficient implementation of ERC721 standards
+/// @dev      The contract splits functionality between WorldGen and WorldUtils
 pragma solidity >=0.8.0 <0.9.0;
 //SPDX-License-Identifier: MIT
 
@@ -13,22 +13,18 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import 'base64-sol/base64.sol';
 import "./WorldGen.sol";
+import "./Utils.sol";
 
-contract Worlds is ERC721Enumerable, Ownable, WorldGenerator {
+contract Worlds is ERC721Enumerable, Ownable, WorldGenerator, WorldUtils {
 
   using Strings for uint256;
   using Counters for Counters.Counter;
   Counters.Counter private _tokenIds;
 
-  uint256 private mintDeadline;
   IERC20 private energyToken;
   bool private init;
-  address private buidlguidl;
 
-  constructor() ERC721("Worlds", "WORLDS") {
-
-    mintDeadline = block.timestamp + 24 hours;
-  }
+  constructor() ERC721("Worlds", "WORLDS") {  }
 
   // Mapping of tokenId to timestamp of last token claim. Upon claiming tokens the timer is reset
   mapping (uint256 => uint256) private lastExtraction;
@@ -58,7 +54,7 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator {
     payable 
     returns (uint256) {
       require(msg.value >= 0.05 ether, "!funds");
-      require(_tokenIds.current() < 64, "Max supply");
+      require(_tokenIds.current() < 64, "!supply");
 
       bytes32 rand = predictableRandom();
       uint256 id = _tokenIds.current();
@@ -76,8 +72,8 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator {
     view 
     override 
     returns (string memory) {
-      require(_exists(id), "not exist");
-      string memory description = ">>>spoolingSentience...success";
+      require(_exists(id), "!exist");
+      string memory description = ">>>spoolingSentience...";
       string memory output = generateSVGofTokenById(id);
 
       string memory json = Base64.encode(
@@ -93,9 +89,9 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator {
     internal 
     view 
     returns (string memory) {
-    require(_exists(id), "not exist");
+    require(_exists(id), "!exist");
       string[18] memory parts;
-        parts[0] = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 400"><style>.base { fill: white; font-family: monospace; font-size: 14px; }</style><rect width="100%" height="100%" fill="black" /><text x="10" y="20" class="base">';
+        parts[0] = svgDescription;
 
         parts[1] = getType(id);
 
@@ -143,42 +139,12 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator {
     return render;
   }
 
-
   function worldEnergy(uint256 id) public view returns (uint256) {
     return ((block.timestamp - lastExtraction[id]) / 1 minutes)*(getEnergyLevel(id)/100);
-  }
-
-  function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
-      if (_i == 0) {
-          return "0";
-      }
-      uint j = _i;
-      uint len;
-      while (j != 0) {
-          len++;
-          j /= 10;
-      }
-      bytes memory bstr = new bytes(len);
-      uint k = len;
-      while (_i != 0) {
-          k = k-1;
-          uint8 temp = (48 + uint8(_i - _i / 10 * 10));
-          bytes1 b1 = bytes1(temp);
-          bstr[k] = b1;
-          _i /= 10;
-      }
-      return string(bstr);
   }
 
   receive() payable external {}
 
   fallback() payable external {}
-
-  function payOut(address payable to, uint256 amount) external payable returns (bool) {
-    //get proper pattern for ETH transfer. Transfer 0.25 of payout to BuidlGuidl address
-    (bool success, bytes memory data)= to.call{value: amount*75/100}("");
-    (bool success1, bytes memory data1)= buidlguidl.call{value: amount*25/100}("");
-    return success;
-  }
 
 }

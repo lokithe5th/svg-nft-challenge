@@ -20,7 +20,7 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   await deploy("Worlds", {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer,
-    // args: [ "Hello", ethers.utils.parseEther("1.5") ],
+    //args: [ "Hello", ethers.utils.parseEther("1.5") ],
     log: true,
     waitConfirmations: 5,
   });
@@ -31,7 +31,7 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   await deploy("EnergyToken", {
     // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer,
-    args: [ Worlds.address ],
+    args: [Worlds.address],
     log: true,
     waitConfirmations: 5,
   });
@@ -87,4 +87,4 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   //   console.error(error);
   // }
 };
-module.exports.tags = ["Worlds"];
+module.exports.tags = ["Worlds", "EnergyToken"];

@@ -21,9 +21,7 @@ contract EnergyToken is ERC20 {
     function transfer(address to, uint256 amount) public override returns (bool) {
         address owner = _msgSender();
         _transfer(owner, to, amount);
-        if (to != msg.sender) {
-            _resetCharge(msg.sender);
-        }
+        _resetCharge(msg.sender);
         return true;
     }
 
@@ -32,11 +30,9 @@ contract EnergyToken is ERC20 {
         address to,
         uint256 amount
     ) public virtual override returns (bool) {
-        address spender = _msgSender();
-        _spendAllowance(from, spender, amount);
-        _transfer(from, to, amount);
+        ERC20.transferFrom(from, to, amount);
         if (to != msg.sender) {
-            _resetCharge(msg.sender);
+            _resetCharge(from);
         }
         return true;
     }

@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: MIT
+/// @title  WorldGen
+/// @author @lourenslinde || lourens.eth
+/// @notice World Generation logic
 pragma solidity >=0.8.0 <0.9.0;
 
 contract WorldGenerator {
 
-    // Mapping of tokenId to rand used to generate properties
+  // Mapping of tokenId to rand used to generate properties
   mapping (uint256 => bytes32) public properties;
 
-/// The array of different climates a planet might have
-    string[] internal climates = [
+  /// The array of different climates a planet might have
+  string[] internal climates = [
         "Frozen",
         "Desert",
         "Ocean",
@@ -15,7 +18,7 @@ contract WorldGenerator {
         ];
 
   //  Base resources found on planet
-    string[] internal resources = [
+  string[] internal resources = [
         "Iron",
         "Copper",
         "Gold",
@@ -27,7 +30,7 @@ contract WorldGenerator {
         ];
 
   //  Artifact available on planet
-    string[] internal artifact = [
+  string[] internal artifact = [
         "Miner",
         "Terraformer",
         "World Computer",
@@ -38,7 +41,7 @@ contract WorldGenerator {
         ];
 
   //  Type of atmosphere that is dominant on planet
-    string[] internal atmosphere = [
+  string[] internal atmosphere = [
         "Oxygen",
         "Nitrogen",
         "Methane",
@@ -46,7 +49,7 @@ contract WorldGenerator {
         ];
 
   //  Mysterious object close to world. What is it's purpose?
-    string[] internal object = [
+  string[] internal object = [
         "Excession",
         "Moon",
         "Orbital",
@@ -57,7 +60,7 @@ contract WorldGenerator {
         ];
 
   //  These ancient and powerful civilizations may leave powerful versions of their technologies
-    string[] internal named = [
+  string[] internal named = [
         "Elder",
         "Hive",
         "Annointed",
@@ -65,7 +68,7 @@ contract WorldGenerator {
         ];
 
   //  Some technologies are so advanced as to seem like magic
-    string[] internal suffixes = [
+  string[] internal suffixes = [
         "of the DAO",
         "of the Queen",
         "of the Known",
