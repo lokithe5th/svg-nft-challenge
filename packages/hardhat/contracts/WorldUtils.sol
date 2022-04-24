@@ -7,6 +7,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 contract WorldUtils { 
 
+    //  Refactoring required storage of this string to reduce main Worlds contract size
     string internal svgDescription = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 400"><style>.base { fill: white; font-family: monospace; font-size: 14px; }</style><rect width="100%" height="100%" fill="black" /><text x="10" y="20" class="base">';
 
     /// @notice Converts an unsigned integer to string

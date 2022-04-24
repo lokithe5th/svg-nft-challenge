@@ -13,7 +13,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import 'base64-sol/base64.sol';
 import "./WorldGen.sol";
-import "./Utils.sol";
+import "./WorldUtils.sol";
 
 contract Worlds is ERC721Enumerable, Ownable, WorldGenerator, WorldUtils {
 
@@ -29,6 +29,10 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator, WorldUtils {
   // Mapping of tokenId to timestamp of last token claim. Upon claiming tokens the timer is reset
   mapping (uint256 => uint256) private lastExtraction;
 
+  /// @notice Sets the pointer to the Energy token
+  /// @dev    Initializes the Energy token address
+  /// @param  tokenAddress The address of the Energy token
+  /// @return bool Was the init successful?
   function initToken(address tokenAddress) external returns (bool) {
     require(!init,"init");
     energyToken = IERC20(tokenAddress);
@@ -36,6 +40,11 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator, WorldUtils {
     return init;
   }
 
+  /// @notice Allows NFT holder to claim tokens
+  /// @dev    Checks an NFT for Energy and transfers Energy from the Worlds contract to the recipient
+  /// @param  to Address where the tokens must be transferred
+  /// @param  tokenId The id of the NFT being drained
+  /// @return uint256 The amount of Energy transferred
   function claimTokens(
     address payable to, 
     uint256 tokenId) 
@@ -49,6 +58,9 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator, WorldUtils {
       return tokensClaimable;
   }
 
+  /// @notice Mint function for Worlds NFT
+  /// @dev    Checks if msg.value is greater than or equal to the asking price
+  /// @return id The token id of the newly minted World
   function mintItem() 
     public 
     payable 
@@ -67,6 +79,9 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator, WorldUtils {
       return id;
   }
 
+  /// @notice Token URI generation logic 
+  /// @param  id Generates the token URI for the given token id 
+  /// @return string Represenation of token URI in string format
   function tokenURI(uint256 id) 
     public 
     view 
@@ -85,6 +100,9 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator, WorldUtils {
           
   }
 
+  /// @notice Generates SVG image for a given token id
+  /// @param  id Target World
+  /// @return string Representation of the SVG image in string format
   function generateSVGofTokenById(uint256 id) 
     internal 
     view 
@@ -133,18 +151,26 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator, WorldUtils {
     return svg;
   }
 
-  // Visibility is `public` to enable it being called by other contracts for composition.
+  /// @notice Public facing render function
+  /// @dev    Visibility is `public` to enable it being called by other contracts for composition.
+  /// @param  id Target for rendering
+  /// @return string SVG image represented as a string
   function renderTokenById(uint256 id) public view returns (string memory) {
     string memory render = string(abi.encodePacked(generateSVGofTokenById(id)));
     return render;
   }
 
+  /// @notice Amount of energy the target world has generated
+  /// @param  id Token id of the target world
+  /// @return uint256 Amount of energy the world has amassed
   function worldEnergy(uint256 id) public view returns (uint256) {
     return ((block.timestamp - lastExtraction[id]) / 1 minutes)*(getEnergyLevel(id)/100);
   }
 
+  //  Generic receive function to allow the reception of tokens
   receive() payable external {}
 
+  //  Generic fallback function required by Solidity
   fallback() payable external {}
 
 }

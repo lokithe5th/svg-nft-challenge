@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 /// @title  WorldGen
 /// @author @lourenslinde || lourens.eth
-/// @notice World Generation logic
+/// @notice World Generation logic for Worlds NFTs
 pragma solidity >=0.8.0 <0.9.0;
 
 contract WorldGenerator {
@@ -78,6 +78,8 @@ contract WorldGenerator {
         "of empowerment"
         ];
 
+  /// @notice Generates a pseudorandom number
+  /// @return bytes32 Pseudorandom number used for determining the World's properties
   function predictableRandom() 
     internal 
     view 
@@ -85,6 +87,7 @@ contract WorldGenerator {
       return keccak256(abi.encodePacked( blockhash(block.number-1), msg.sender, address(this) ));
   } 
 
+  //  Type of environment
   function getType(uint256 tokenId) 
     internal 
     view 
@@ -92,6 +95,7 @@ contract WorldGenerator {
       return determineEnv(tokenId, "Climate", climates);
   }
 
+  //  Type of resource
   function getResource(uint256 tokenId) 
     internal 
     view 
@@ -99,6 +103,7 @@ contract WorldGenerator {
       return determineEnv(tokenId, "Resource", resources);
   }
 
+  //  Energy level of the World
   function getEnergyLevel(uint256 tokenId) 
     internal 
     pure 
@@ -106,6 +111,7 @@ contract WorldGenerator {
       return (uint256(keccak256(abi.encodePacked(tokenId))) % 900) + 100;
   }
 
+  //  Size of the World
   function getSize(uint256 tokenId) 
     internal 
     view 
@@ -113,6 +119,7 @@ contract WorldGenerator {
       return (uint256(keccak256(abi.encodePacked(properties[tokenId]))) % 9000) + 1000;
   }
 
+  //  Artifact on World
   function getArtifact(uint256 tokenId) 
     internal 
     view 
@@ -120,6 +127,7 @@ contract WorldGenerator {
       return determineProperty(tokenId, "Artifact", artifact);
   }
 
+  //  Atmosphere on World
   function getAtmosphere(uint256 tokenId) 
     internal 
     view 
@@ -127,6 +135,7 @@ contract WorldGenerator {
       return determineEnv(tokenId, "Atmosphere", atmosphere);
   }
 
+  //  Mysterious object close to World
   function getObject(uint256 tokenId) 
     internal 
     view 
@@ -134,6 +143,7 @@ contract WorldGenerator {
       return determineProperty(tokenId, "Object", object);
   }  
 
+  //  Generic object property determination
   function determineProperty(
     uint256 tokenId, 
     string memory keyPrefix, 
@@ -159,6 +169,7 @@ contract WorldGenerator {
         return output;
     }
 
+  //  Determine environment and prefix
   function determineEnv(
     uint256 tokenId, 
     string memory keyPrefix, 

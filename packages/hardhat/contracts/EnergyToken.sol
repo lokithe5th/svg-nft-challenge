@@ -18,6 +18,7 @@ contract EnergyToken is ERC20 {
         lastSpent[target] = block.timestamp;
     }
 
+    //  Additional logic for Energy token transfers. 
     function transfer(address to, uint256 amount) public override returns (bool) {
         address owner = _msgSender();
         _transfer(owner, to, amount);
@@ -25,6 +26,7 @@ contract EnergyToken is ERC20 {
         return true;
     }
 
+    //  Additional logic for Energy transferForm functions.
     function transferFrom(
         address from,
         address to,
