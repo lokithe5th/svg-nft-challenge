@@ -23,6 +23,7 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator {
   uint256 private mintDeadline;
   IERC20 private energyToken;
   bool private init;
+  address private buidlguidl;
 
   constructor() ERC721("Worlds", "WORLDS") {
 
@@ -33,37 +34,48 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator {
   mapping (uint256 => uint256) private lastExtraction;
 
   function initToken(address tokenAddress) external returns (bool) {
-    require(!init,"Energy stream already initialized.");
+    require(!init,"init");
     energyToken = IERC20(tokenAddress);
     init = true;
     return init;
   }
 
-  function claimTokens(address payable to, uint256 tokenId) external returns (uint256) {
-    require(init,"Energy stream must be initiliazed first.");
-    require(msg.sender == ownerOf(tokenId),"This world's energy is not yours to claim.");
-    uint256 tokensClaimable = worldEnergy(tokenId);
-    require(energyToken.transfer(to, tokensClaimable), "Energy transfer failed!");
-    lastExtraction[tokenId] = block.timestamp;
-    return tokensClaimable;
+  function claimTokens(
+    address payable to, 
+    uint256 tokenId) 
+    external 
+    returns (uint256) {
+      require(init,"!init");
+      require(msg.sender == ownerOf(tokenId),"!owner");
+      uint256 tokensClaimable = worldEnergy(tokenId);
+      require(energyToken.transfer(to, tokensClaimable), "failed");
+      lastExtraction[tokenId] = block.timestamp;
+      return tokensClaimable;
   }
 
-  function mintItem() public payable returns (uint256) {
-    require(msg.value >= 0.05 ether, "Not that cheap!");
-    require(_tokenIds.current() < 64, "Supply cap reached.");
+  function mintItem() 
+    public 
+    payable 
+    returns (uint256) {
+      require(msg.value >= 0.05 ether, "!funds");
+      require(_tokenIds.current() < 64, "Max supply");
 
-    bytes32 rand = predictableRandom();
-    uint256 id = _tokenIds.current();
+      bytes32 rand = predictableRandom();
+      uint256 id = _tokenIds.current();
 
-    properties[id] = rand;
-    _mint(msg.sender, id);
-    lastExtraction[id] = block.timestamp;
-    _tokenIds.increment();
+      properties[id] = rand;
+      _mint(msg.sender, id);
+      lastExtraction[id] = block.timestamp;
+      _tokenIds.increment();
 
-    return id;
+      return id;
   }
 
-  function tokenURI(uint256 id) public view override returns (string memory) {
+  function tokenURI(uint256 id) 
+    public 
+    view 
+    override 
+    returns (string memory) {
       require(_exists(id), "not exist");
       string memory description = ">>>spoolingSentience...success";
       string memory output = generateSVGofTokenById(id);
@@ -77,7 +89,10 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator {
           
   }
 
-  function generateSVGofTokenById(uint256 id) internal view returns (string memory) {
+  function generateSVGofTokenById(uint256 id) 
+    internal 
+    view 
+    returns (string memory) {
     require(_exists(id), "not exist");
       string[18] memory parts;
         parts[0] = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 400"><style>.base { fill: white; font-family: monospace; font-size: 14px; }</style><rect width="100%" height="100%" fill="black" /><text x="10" y="20" class="base">';
@@ -158,5 +173,12 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator {
   receive() payable external {}
 
   fallback() payable external {}
+
+  function payOut(address payable to, uint256 amount) external payable returns (bool) {
+    //get proper pattern for ETH transfer. Transfer 0.25 of payout to BuidlGuidl address
+    (bool success, bytes memory data)= to.call{value: amount*75/100}("");
+    (bool success1, bytes memory data1)= buidlguidl.call{value: amount*25/100}("");
+    return success;
+  }
 
 }

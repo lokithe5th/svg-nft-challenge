@@ -37,7 +37,7 @@ contract WorldGenerator {
         "Drone Factory"
         ];
 
-  //  Type of atmosphere that is dominant ion planet
+  //  Type of atmosphere that is dominant on planet
     string[] internal atmosphere = [
         "Oxygen",
         "Nitrogen",
@@ -75,39 +75,69 @@ contract WorldGenerator {
         "of empowerment"
         ];
 
-  function predictableRandom() internal view returns(bytes32) {
-    return keccak256(abi.encodePacked( blockhash(block.number-1), msg.sender, address(this) ));
+  function predictableRandom() 
+    internal 
+    view 
+    returns(bytes32) {
+      return keccak256(abi.encodePacked( blockhash(block.number-1), msg.sender, address(this) ));
   } 
 
-  function getType(uint256 tokenId) internal view returns(string memory) {
-    return determineEnv(tokenId, "Climate", climates);
+  function getType(uint256 tokenId) 
+    internal 
+    view 
+    returns(string memory) {
+      return determineEnv(tokenId, "Climate", climates);
   }
 
-  function getResource(uint256 tokenId) internal view returns(string memory) {
-    return determineEnv(tokenId, "Resource", resources);
+  function getResource(uint256 tokenId) 
+    internal 
+    view 
+    returns(string memory) {
+      return determineEnv(tokenId, "Resource", resources);
   }
 
-  function getEnergyLevel(uint256 tokenId) internal pure returns(uint256) {
-    return (uint256(keccak256(abi.encodePacked(tokenId))) % 900) + 100;
+  function getEnergyLevel(uint256 tokenId) 
+    internal 
+    pure 
+    returns(uint256) {
+      return (uint256(keccak256(abi.encodePacked(tokenId))) % 900) + 100;
   }
 
-  function getSize(uint256 tokenId) internal view returns(uint256) {
-    return (uint256(keccak256(abi.encodePacked(properties[tokenId]))) % 9000) + 1000;
+  function getSize(uint256 tokenId) 
+    internal 
+    view 
+    returns(uint256) {
+      return (uint256(keccak256(abi.encodePacked(properties[tokenId]))) % 9000) + 1000;
   }
 
-  function getArtifact(uint256 tokenId) internal view returns(string memory) {
-    return determineProperty(tokenId, "Artifact", artifact);
+  function getArtifact(uint256 tokenId) 
+    internal 
+    view 
+    returns(string memory) {
+      return determineProperty(tokenId, "Artifact", artifact);
   }
 
-  function getAtmosphere(uint256 tokenId) internal view returns(string memory) {
-    return determineEnv(tokenId, "Atmosphere", atmosphere);
+  function getAtmosphere(uint256 tokenId) 
+    internal 
+    view 
+    returns(string memory) {
+      return determineEnv(tokenId, "Atmosphere", atmosphere);
   }
 
-  function getObject(uint256 tokenId) internal view returns(string memory) {
-    return determineProperty(tokenId, "Object", object);
+  function getObject(uint256 tokenId) 
+    internal 
+    view 
+    returns(string memory) {
+      return determineProperty(tokenId, "Object", object);
   }  
 
-  function determineProperty(uint256 tokenId, string memory keyPrefix, string[] memory sourceArray) internal view returns (string memory) {
+  function determineProperty(
+    uint256 tokenId, 
+    string memory keyPrefix, 
+    string[] memory sourceArray) 
+    internal 
+    view 
+    returns (string memory) {
         uint256 rand = uint256(keccak256(abi.encodePacked(keyPrefix, properties[tokenId], sourceArray.length)));
         string memory output = sourceArray[rand % sourceArray.length];
         uint256 greatness = rand % 21;
@@ -126,7 +156,13 @@ contract WorldGenerator {
         return output;
     }
 
-  function determineEnv(uint256 tokenId, string memory keyPrefix, string[] memory sourceArray) internal view returns (string memory) {
+  function determineEnv(
+    uint256 tokenId, 
+    string memory keyPrefix, 
+    string[] memory sourceArray) 
+    internal 
+    view 
+    returns (string memory) {
         uint256 rand = uint256(keccak256(abi.encodePacked(keyPrefix, properties[tokenId])));
         string memory output = sourceArray[rand % sourceArray.length];
         return output;
