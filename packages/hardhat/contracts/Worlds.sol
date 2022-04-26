@@ -113,37 +113,37 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator, WorldUtils {
 
         parts[1] = getType(id);
 
-        parts[2] = '</text><text x="10" y="40" class="base">';
+        parts[2] = svgPart2;
 
         parts[3] = getResource(id);
 
-        parts[4] = '</text><text x="10" y="60" class="base">';
+        parts[4] = svgPart4;
 
         parts[5] = uint2str(getSize(id));
 
-        parts[6] = '</text><text x="10" y="80" class="base">';
+        parts[6] = svgPart6;
 
         parts[7] = uint2str(getEnergyLevel(id));
 
-        parts[8] = '</text><text x="10" y="100" class="base">';
+        parts[8] = svgPart8;
 
         parts[9] = getArtifact(id);
 
-        parts[10] = '</text><text x="10" y="120" class="base">';
+        parts[10] = svgPart10;
 
         parts[11] = getAtmosphere(id);
 
-        parts[12] = '</text><text x="10" y="140" class="base">';
+        parts[12] = svgPart12;
 
         parts[13] = getObject(id);
 
-        parts[14] = '</text><text x="10" y="160" class="base">';
+        parts[14] = svgPart14;
 
         parts[15] = uint2str(worldEnergy(id));
 
-        parts[16] = '</text><text x="10" y="160" class="base">';
+        parts[16] = svgPart16;
 
-        parts[17] = '</text></svg>';
+        parts[17] = svgPart17;
 
         string memory svg = string(abi.encodePacked(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]));
         svg = string(abi.encodePacked(svg, parts[9], parts[10], parts[11], parts[12], parts[13], parts[14], parts[15], parts[16], parts[17]));

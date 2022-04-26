@@ -9,6 +9,15 @@ contract WorldUtils {
 
     //  Refactoring required storage of this string to reduce main Worlds contract size
     string internal svgDescription = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 400"><style>.base { fill: white; font-family: monospace; font-size: 14px; }</style><rect width="100%" height="100%" fill="black" /><text x="10" y="20" class="base">';
+    string internal svgPart2 = '</text><text x="10" y="40" class="base">';
+    string internal svgPart4 = '</text><text x="10" y="60" class="base">';
+    string internal svgPart6 = '</text><text x="10" y="80" class="base">';
+    string internal svgPart8 = '</text><text x="10" y="100" class="base">';
+    string internal svgPart10 = '</text><text x="10" y="120" class="base">';
+    string internal svgPart12 = '</text><text x="10" y="140" class="base">';
+    string internal svgPart14 = '</text><text x="10" y="160" class="base">';
+    string internal svgPart16 = '</text><text x="10" y="160" class="base">';
+    string internal svgPart17 = '</text></svg>';
 
     /// @notice Converts an unsigned integer to string
     /// @param _i Integer variable to be converted to string
