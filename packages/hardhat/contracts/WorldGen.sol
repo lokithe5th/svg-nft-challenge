@@ -4,80 +4,18 @@
 /// @notice World Generation logic for Worlds NFTs
 pragma solidity >=0.8.0 <0.9.0;
 
-contract WorldGenerator {
+//import "./WorldsBase.sol";
+import "./WorldStorage.sol";
+import "./WorldUtils.sol";
+
+contract WorldGenerator is WorldStorage, WorldUtils {
 
   // Mapping of tokenId to rand used to generate properties
   mapping (uint256 => bytes32) public properties;
 
-  /// The array of different climates a planet might have
-  string[] internal climates = [
-        "Frozen",
-        "Desert",
-        "Ocean",
-        "Jungle"
-        ];
-
-  //  Base resources found on planet
-  string[] internal resources = [
-        "Iron",
-        "Copper",
-        "Gold",
-        "Organics",
-        "Silicate",
-        "Gravity Shards",
-        "Unobtainium",
-        "Uranium"
-        ];
-
-  //  Artifact available on planet
-  string[] internal artifact = [
-        "Miner",
-        "Terraformer",
-        "World Computer",
-        "Contained Antimatter",
-        "Transmitter",
-        "Fleet",
-        "Drone Factory"
-        ];
-
-  //  Type of atmosphere that is dominant on planet
-  string[] internal atmosphere = [
-        "Oxygen",
-        "Nitrogen",
-        "Methane",
-        "Helium"
-        ];
-
-  //  Mysterious object close to world. What is it's purpose?
-  string[] internal object = [
-        "Excession",
-        "Moon",
-        "Orbital",
-        "Gate",
-        "Shroud",
-        "Solar Farm",
-        "Fabrication Hub"
-        ];
-
-  //  These ancient and powerful civilizations may leave powerful versions of their technologies
-  string[] internal named = [
-        "Elder",
-        "Hive",
-        "Annointed",
-        "Augmented"
-        ];
-
-  //  Some technologies are so advanced as to seem like magic
-  string[] internal suffixes = [
-        "of the DAO",
-        "of the Queen",
-        "of the Known",
-        "of overproduction",
-        "of enhanced defense",
-        "of the Sublimed",
-        "of empowerment"
-        ];
-
+  // Mapping of tokenId to timestamp of last token claim. Upon claiming tokens the timer is reset
+  mapping (uint256 => uint256) public lastExtraction;
+  
   /// @notice Generates a pseudorandom number
   /// @return bytes32 Pseudorandom number used for determining the World's properties
   function predictableRandom() 
@@ -89,7 +27,7 @@ contract WorldGenerator {
 
   //  Type of environment
   function getType(uint256 tokenId) 
-    internal 
+    public 
     view 
     returns(string memory) {
       return determineEnv(tokenId, "Climate", climates);
@@ -97,7 +35,7 @@ contract WorldGenerator {
 
   //  Type of resource
   function getResource(uint256 tokenId) 
-    internal 
+    public 
     view 
     returns(string memory) {
       return determineEnv(tokenId, "Resource", resources);
@@ -105,7 +43,7 @@ contract WorldGenerator {
 
   //  Energy level of the World
   function getEnergyLevel(uint256 tokenId) 
-    internal 
+    public 
     pure 
     returns(uint256) {
       return (uint256(keccak256(abi.encodePacked(tokenId))) % 900) + 100;
@@ -113,7 +51,7 @@ contract WorldGenerator {
 
   //  Size of the World
   function getSize(uint256 tokenId) 
-    internal 
+    public 
     view 
     returns(uint256) {
       return (uint256(keccak256(abi.encodePacked(properties[tokenId]))) % 9000) + 1000;
@@ -121,7 +59,7 @@ contract WorldGenerator {
 
   //  Artifact on World
   function getArtifact(uint256 tokenId) 
-    internal 
+    public 
     view 
     returns(string memory) {
       return determineProperty(tokenId, "Artifact", artifact);
@@ -129,7 +67,7 @@ contract WorldGenerator {
 
   //  Atmosphere on World
   function getAtmosphere(uint256 tokenId) 
-    internal 
+    public 
     view 
     returns(string memory) {
       return determineEnv(tokenId, "Atmosphere", atmosphere);
@@ -137,7 +75,7 @@ contract WorldGenerator {
 
   //  Mysterious object close to World
   function getObject(uint256 tokenId) 
-    internal 
+    public 
     view 
     returns(string memory) {
       return determineProperty(tokenId, "Object", object);
@@ -177,8 +115,30 @@ contract WorldGenerator {
     internal 
     view 
     returns (string memory) {
-        uint256 rand = uint256(keccak256(abi.encodePacked(keyPrefix, properties[tokenId])));
-        string memory output = sourceArray[rand % sourceArray.length];
-        return output;
+        return sourceArray[uint256(keccak256(abi.encodePacked(keyPrefix, properties[tokenId]))) % sourceArray.length];
     }
+
+  /// @notice Amount of energy the target world has generated
+  /// @param  id Token id of the target world
+  /// @return uint256 Amount of energy the world has amassed
+  //function worldEnergy(uint256 id) internal view returns (uint256) {
+  //  return ((block.timestamp - lastExtraction[id]) / 1 minutes)*(getEnergyLevel(id)/100);
+  //}
+
+  /// @notice Generates SVG image for a given token id
+  /// @param  id Target World
+  /// @return string Representation of the SVG image in string format
+  function generateSVGofTokenById(uint256 id) 
+    public 
+    view 
+    returns (string memory) {
+
+        /*string memory svg = string(abi.encodePacked(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]));
+        svg = string(abi.encodePacked(svg, parts[9], parts[10], parts[11], parts[12], parts[13], parts[14], parts[15], parts[16], parts[17]));
+      */
+      
+        string memory svg = string(abi.encodePacked(svgParts[0], getType(id), svgParts[1], getResource(id), svgParts[2], uint2str(getSize(id)), svgParts[3], uint2str(getEnergyLevel(id)), svgParts[4]));
+        svg = string(abi.encodePacked(svg, getArtifact(id), svgParts[5], getAtmosphere(id), svgParts[6], getObject(id), svgParts[7], uint2str(((block.timestamp - lastExtraction[id]) / 1 minutes)*(getEnergyLevel(id)/100)), svgParts[8], svgParts[9]));
+    return svg;
+  }
 }

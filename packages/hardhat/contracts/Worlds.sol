@@ -6,59 +6,55 @@
 pragma solidity >=0.8.0 <0.9.0;
 //SPDX-License-Identifier: MIT
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
+//import "@openzeppelin/contracts/utils/Strings.sol";
 import 'base64-sol/base64.sol';
 import "./WorldGen.sol";
-import "./WorldUtils.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract Worlds is ERC721Enumerable, Ownable, WorldGenerator, WorldUtils {
+contract Worlds is ERC721Enumerable, Ownable, WorldGenerator {
 
-  using Strings for uint256;
+  //using Strings for uint256;
   using Counters for Counters.Counter;
   Counters.Counter private _tokenIds;
-
   IERC20 private energyToken;
   bool private init;
 
   constructor() ERC721("Worlds", "WORLDS") {  }
 
-  // Mapping of tokenId to timestamp of last token claim. Upon claiming tokens the timer is reset
-  mapping (uint256 => uint256) private lastExtraction;
-
-  /// @notice Sets the pointer to the Energy token
-  /// @dev    Initializes the Energy token address
-  /// @param  tokenAddress The address of the Energy token
-  /// @return bool Was the init successful?
-  function initToken(address tokenAddress) external returns (bool) {
-    require(!init,"init");
-    energyToken = IERC20(tokenAddress);
-    init = true;
-    return init;
+      /// @notice Sets the pointer to the Energy token
+    /// @dev    Initializes the Energy token address
+    /// @param  tokenAddress The address of the Energy token
+    function initToken(address tokenAddress) public {
+        require(init == true,"init");
+        energyToken = IERC20(tokenAddress);
+        init = true;
   }
-
-  /// @notice Allows NFT holder to claim tokens
-  /// @dev    Checks an NFT for Energy and transfers Energy from the Worlds contract to the recipient
-  /// @param  to Address where the tokens must be transferred
-  /// @param  tokenId The id of the NFT being drained
-  /// @return uint256 The amount of Energy transferred
-  function claimTokens(
+  
+    /// @notice Allows NFT holder to claim tokens
+    /// @dev    Checks an NFT for Energy and transfers Energy from the Worlds contract to the recipient
+    /// @param  to Address where the tokens must be transferred
+    /// @param  tokenId The id of the NFT being drained
+    function claimTokens(
     address payable to, 
     uint256 tokenId) 
-    external 
-    returns (uint256) {
+    public {
       require(init,"!init");
       require(msg.sender == ownerOf(tokenId),"!owner");
-      uint256 tokensClaimable = worldEnergy(tokenId);
-      tokensClaimable = tokensClaimable + ((balanceOf(msg.sender)*tokensClaimable/100));
-      require(energyToken.transfer(to, tokensClaimable), "failed");
+      require(energyToken.transfer(to, ((block.timestamp - lastExtraction[tokenId]) / 1 minutes)*(getEnergyLevel(tokenId)/100) + ((balanceOf(msg.sender)*(((block.timestamp - lastExtraction[tokenId]) / 1 minutes)*(getEnergyLevel(tokenId)/100))/100))), "failed");
       lastExtraction[tokenId] = block.timestamp;
-      return tokensClaimable;
   }
+
+    
+    /// @notice Pays out the funds in the contract
+    /// @param  to The address where funds should be sent
+    /// @param  amount The amount (in wei) which should be paid out to target address
+    function payOut(address payable to, uint256 amount) public payable {
+        (bool success, )= to.call{value: amount}("");
+    }
+
 
   /// @notice Mint function for Worlds NFT
   /// @dev    Checks if msg.value is greater than or equal to the asking price
@@ -70,15 +66,14 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator, WorldUtils {
       require(msg.value >= 0.05 ether, "!funds");
       require(_tokenIds.current() < 64, "!supply");
 
-      bytes32 rand = predictableRandom();
-      uint256 id = _tokenIds.current();
+      //uint256 id = ;
 
-      properties[id] = rand;
-      _mint(msg.sender, id);
-      lastExtraction[id] = block.timestamp;
+      properties[_tokenIds.current()] = predictableRandom();
+      _mint(msg.sender, _tokenIds.current());
+      lastExtraction[_tokenIds.current()] = block.timestamp;
       _tokenIds.increment();
 
-      return id;
+      return _tokenIds.current() -1;
   }
 
   /// @notice Token URI generation logic 
@@ -90,67 +85,15 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator, WorldUtils {
     override 
     returns (string memory) {
       require(_exists(id), "!exist");
-      string memory description = ">>>spoolingSentience...";
-      string memory output = generateSVGofTokenById(id);
+      //string memory output = generateSVGofTokenById(id);
 
       string memory json = Base64.encode(
         bytes(string(abi.encodePacked(
-          '{"name": "World #', uint2str(id), '", "tokenId": ',uint2str(id),', "description":"', description,'", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(output)), '"}'))));
+          '{"name": "World #', uint2str(id), '", "tokenId": ',uint2str(id),', "description":", "Worlds",", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(generateSVGofTokenById(id))), '"}'))));
 
-        output = string(abi.encodePacked('data:application/json;base64,', json));
-      return output;
+        json = string(abi.encodePacked('data:application/json;base64,', json));
+      return json;
           
-  }
-
-  /// @notice Generates SVG image for a given token id
-  /// @param  id Target World
-  /// @return string Representation of the SVG image in string format
-  function generateSVGofTokenById(uint256 id) 
-    internal 
-    view 
-    returns (string memory) {
-    require(_exists(id), "!exist");
-      string[18] memory parts;
-        parts[0] = svgDescription;
-
-        parts[1] = getType(id);
-
-        parts[2] = svgPart2;
-
-        parts[3] = getResource(id);
-
-        parts[4] = svgPart4;
-
-        parts[5] = uint2str(getSize(id));
-
-        parts[6] = svgPart6;
-
-        parts[7] = uint2str(getEnergyLevel(id));
-
-        parts[8] = svgPart8;
-
-        parts[9] = getArtifact(id);
-
-        parts[10] = svgPart10;
-
-        parts[11] = getAtmosphere(id);
-
-        parts[12] = svgPart12;
-
-        parts[13] = getObject(id);
-
-        parts[14] = svgPart14;
-
-        parts[15] = uint2str(worldEnergy(id));
-
-        parts[16] = svgPart16;
-
-        parts[17] = svgPart17;
-
-        string memory svg = string(abi.encodePacked(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]));
-        svg = string(abi.encodePacked(svg, parts[9], parts[10], parts[11], parts[12], parts[13], parts[14], parts[15], parts[16], parts[17]));
-
-    return svg;
   }
 
   /// @notice Public facing render function
@@ -158,15 +101,9 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator, WorldUtils {
   /// @param  id Target for rendering
   /// @return string SVG image represented as a string
   function renderTokenById(uint256 id) public view returns (string memory) {
-    string memory render = string(abi.encodePacked(generateSVGofTokenById(id)));
-    return render;
-  }
-
-  /// @notice Amount of energy the target world has generated
-  /// @param  id Token id of the target world
-  /// @return uint256 Amount of energy the world has amassed
-  function worldEnergy(uint256 id) public view returns (uint256) {
-    return ((block.timestamp - lastExtraction[id]) / 1 minutes)*(getEnergyLevel(id)/100);
+    require(_exists(id), "!exist");
+    //string memory render = ;
+    return string(abi.encodePacked(generateSVGofTokenById(id)));
   }
 
   //  Generic receive function to allow the reception of tokens
