@@ -2,6 +2,7 @@
 /// @author   @lourenslinde || lourens.eth
 /// @notice   This contract controls the "Worlds" NFT collection and associated token actions
 /// @dev      The contract splits functionality between WorldGen and WorldUtils
+/// @custom   Credit goes to Loot, for the inspiration, and Austin Griffith / BuidlGuidl for the challenge. 
 pragma solidity >=0.8.0 <0.9.0;
 //SPDX-License-Identifier: MIT
 
@@ -53,6 +54,7 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator, WorldUtils {
       require(init,"!init");
       require(msg.sender == ownerOf(tokenId),"!owner");
       uint256 tokensClaimable = worldEnergy(tokenId);
+      tokensClaimable = tokensClaimable + ((balanceOf(msg.sender)*tokensClaimable/100));
       require(energyToken.transfer(to, tokensClaimable), "failed");
       lastExtraction[tokenId] = block.timestamp;
       return tokensClaimable;
