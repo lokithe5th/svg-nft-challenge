@@ -181,7 +181,7 @@ function App(props) {
   
   const balance = useContractReader(readContracts, "Worlds", "balanceOf", [address]);
   const totalSupplyBig = useContractReader(readContracts, "Worlds", "_tokenIds", []);
-  const totalSupply = totalSupplyBig && totalSupplyBig.toNumber && totalSupplyBig.toNumber();
+  const totalSupply = (totalSupplyBig && totalSupplyBig.toNumber && totalSupplyBig.toNumber())-1;
   console.log("🤗 totalSupply:", totalSupply);
   const yourBalance = balance && balance.toNumber && balance.toNumber();
   console.log(yourBalance);
@@ -335,6 +335,7 @@ function App(props) {
       <Switch>
         <Route exact path="/">
           {/* pass in any web3 props to this Home component. For example, yourLocalBalance */}
+          <hr />
 						<div class="wrapper">
 							<div class="inner" data-onvisible-trigger="1">
 								<p id="text01" class="style4">A new Universe Awaits</p>
