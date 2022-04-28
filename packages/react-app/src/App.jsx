@@ -340,11 +340,34 @@ function App(props) {
 							<div class="inner" data-onvisible-trigger="1">
 								<p id="text01" class="style4">A new Universe Awaits</p>
 								<h1 id="text69" class="style2">Worlds</h1>
+                <h1>🌍🌍🌍</h1>
 								<p id="text73" class="style1"><span class="p">Cast into the void, you must gather the Energy of this new universe. It is the only way.</span><span class="p"><em>Worlds is a portfolio project by @lourenslinde. It is a Loot derivative and uses a gas-efficient ERC721 implementation.</em></span><span class="p"><strong>Proudly developed with Scaffold-Eth</strong></span></p>
 							</div>
 						</div>
 					<hr id="divider05" class="style1 full screen"></hr>
-					<div id="container02" data-scroll-id="one" data-scroll-behavior="center" data-scroll-offset="0" data-scroll-invisible="1" class="style1 container default">
+          <div id="container03" data-scroll-id="two" data-scroll-behavior="center" data-scroll-offset="0" data-scroll-invisible="1" class="style1 container default">
+						<div class="wrapper">
+							<div class="inner" data-onvisible-trigger="1">
+								<h3 id="text13" class="style7">Mint Your Own</h3>
+								<p id="text14" class="style1">The Worlds universe lives on the Ethereum blockchain as ERC721 tokens. Energy extracted from each world is represented as an ERC20 token.</p>
+							</div>
+						</div>
+					</div>
+          <div><p textAlign="center">🌍🌍🌍</p></div>
+						<div class="wrapper">
+							<div class="inner" data-onvisible-trigger="1">
+                  {userSigner?(
+                <Button type={"primary"} onClick={()=>{
+                  tx( writeContracts.Worlds.mintItem({ value: mintprice.toString(), gasLimit: 3*10**7}))
+                }}>MINT FOR 0.05 ETHER</Button>
+              ):(
+                <Button type={"primary"} onClick={loadWeb3Modal}>CONNECT WALLET</Button>
+              )}
+							</div>
+					</div>
+				
+					<hr id="divider04" class="style1 full screen"></hr>
+          <div id="container02" data-scroll-id="one" data-scroll-behavior="center" data-scroll-offset="0" data-scroll-invisible="1" class="style1 container default">
 						<div class="wrapper">
 							<div class="inner" data-onvisible-trigger="1">
 								<h3 id="text04" class="style7">Discovered Worlds</h3>
@@ -393,27 +416,6 @@ function App(props) {
               />
 							</div>
 						</div>
-					</div>
-					<hr id="divider04" class="style1 full screen"></hr>
-					<div id="container03" data-scroll-id="two" data-scroll-behavior="center" data-scroll-offset="0" data-scroll-invisible="1" class="style1 container default">
-						<div class="wrapper">
-							<div class="inner" data-onvisible-trigger="1">
-								<h3 id="text13" class="style7">Mint Your Own</h3>
-								<p id="text14" class="style1">The Worlds universe lives on the Ethereum blockchain as ERC721 tokens. Energy extracted from each world is represented as an ERC20 token.</p>
-							</div>
-						</div>
-					</div>
-						<div class="wrapper">
-							<div class="inner" data-onvisible-trigger="1">
-								<h3 id="text03" class="style7">E 0.05</h3>
-                  {userSigner?(
-                <Button type={"primary"} onClick={()=>{
-                  tx( writeContracts.Worlds.mintItem({ value: mintprice.toString(), gasLimit: 3*10**7}))
-                }}>MINT FOR 0.05 ETHER</Button>
-              ):(
-                <Button type={"primary"} onClick={loadWeb3Modal}>CONNECT WALLET</Button>
-              )}
-							</div>
 					</div>
 					<hr id="divider03" class="style1 full screen"></hr>
 					<p id="text05" class="style3">© lourenslinde 2022. All rights reserved.</p>
