@@ -6,14 +6,16 @@ import React from "react";
 export default function Header({link, title, subTitle}) {
   return (
     <a href={link} target="_blank" rel="noopener noreferrer">
+      <div className="site-page-header-ghost-wrapper">
       <PageHeader
         title={title}
         subTitle={subTitle}
         style={{ cursor: "pointer" }}
-      />
+      /></div>
     </a>
   );
 }
+
 
 
 Header.defaultProps = {

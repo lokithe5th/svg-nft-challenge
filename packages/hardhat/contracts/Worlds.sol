@@ -6,7 +6,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 //SPDX-License-Identifier: MIT
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 //import "@openzeppelin/contracts/utils/Strings.sol";
@@ -14,21 +14,23 @@ import 'base64-sol/base64.sol';
 import "./WorldGen.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract Worlds is ERC721Enumerable, Ownable, WorldGenerator {
+contract Worlds is ERC721, Ownable, WorldGenerator {
 
   //using Strings for uint256;
   using Counters for Counters.Counter;
-  Counters.Counter private _tokenIds;
+  Counters.Counter public _tokenIds;
   IERC20 private energyToken;
   bool private init;
 
-  constructor() ERC721("Worlds", "WORLDS") {  }
+  constructor() ERC721("Worlds", "WORLDS") { 
+    _tokenIds.increment();
+   }
 
-      /// @notice Sets the pointer to the Energy token
+    /// @notice Sets the pointer to the Energy token
     /// @dev    Initializes the Energy token address
     /// @param  tokenAddress The address of the Energy token
     function initToken(address tokenAddress) public {
-        require(init == true,"init");
+        require(init == false,"init");
         energyToken = IERC20(tokenAddress);
         init = true;
   }
@@ -43,7 +45,7 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator {
     public {
       require(init,"!init");
       require(msg.sender == ownerOf(tokenId),"!owner");
-      require(energyToken.transfer(to, ((block.timestamp - lastExtraction[tokenId]) / 1 minutes)*(getEnergyLevel(tokenId)/100) + ((balanceOf(msg.sender)*(((block.timestamp - lastExtraction[tokenId]) / 1 minutes)*(getEnergyLevel(tokenId)/100))/100))), "failed");
+      require(energyToken.transfer(to, (block.timestamp - lastExtraction[tokenId]) / 1 minutes), "failed");
       lastExtraction[tokenId] = block.timestamp;
   }
 
@@ -89,7 +91,7 @@ contract Worlds is ERC721Enumerable, Ownable, WorldGenerator {
 
       string memory json = Base64.encode(
         bytes(string(abi.encodePacked(
-          '{"name": "World #', uint2str(id), '", "tokenId": ',uint2str(id),', "description":", "Worlds",", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(generateSVGofTokenById(id))), '"}'))));
+          '{"name": "World #', uint2str(id), '", "tokenId": ',uint2str(id),', "description": "Worlds", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(generateSVGofTokenById(id))), '"}'))));
 
         json = string(abi.encodePacked('data:application/json;base64,', json));
       return json;

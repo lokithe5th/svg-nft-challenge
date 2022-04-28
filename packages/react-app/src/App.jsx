@@ -180,7 +180,7 @@ function App(props) {
 
   
   const balance = useContractReader(readContracts, "Worlds", "balanceOf", [address]);
-  const totalSupplyBig = useContractReader(readContracts, "Worlds", "totalSupply", []);
+  const totalSupplyBig = useContractReader(readContracts, "Worlds", "_tokenIds", []);
   const totalSupply = totalSupplyBig && totalSupplyBig.toNumber && totalSupplyBig.toNumber();
   console.log("🤗 totalSupply:", totalSupply);
   const yourBalance = balance && balance.toNumber && balance.toNumber();
@@ -194,10 +194,10 @@ function App(props) {
       for (let tokenIndex = 0; tokenIndex < totalSupply; tokenIndex++) {
         try {
           console.log("GEtting token index", tokenIndex);
-          const tokenId = await readContracts.Worlds.tokenOfOwnerByIndex(address, tokenIndex);
-          const testId = tokenId && balance.toNumber && balance.toNumber();
-          console.log("tokenId", testId);
-          const tokenURI = await readContracts.Worlds.tokenURI(tokenId);
+          //const tokenId = await readContracts.Worlds.tokenOfOwnerByIndex(address, tokenIndex);
+          //const testId = tokenId && balance.toNumber && balance.toNumber();
+          console.log("tokenId", tokenIndex);
+          const tokenURI = await readContracts.Worlds.tokenURI(tokenIndex);
           const jsonManifestString = atob(tokenURI.substring(29))
           console.log("jsonManifestString", jsonManifestString);
 /*
@@ -208,8 +208,8 @@ function App(props) {
           try {
             const jsonManifest = JSON.parse(jsonManifestString);
             console.log("jsonManifest", jsonManifest);
-            collectibleUpdate.push({ id: testId, uri: tokenURI, owner: address, ...jsonManifest });
-            console.log({id: testId, uri: tokenURI, owner: address, ...jsonManifest});
+            collectibleUpdate.push({ id: tokenIndex, uri: tokenURI, owner: address, ...jsonManifest });
+            console.log({id: tokenIndex, uri: tokenURI, owner: address, ...jsonManifest});
           } catch (e) {
             console.log(e);
           }
@@ -335,27 +335,19 @@ function App(props) {
       <Switch>
         <Route exact path="/">
           {/* pass in any web3 props to this Home component. For example, yourLocalBalance */}
-          <div style={{ maxWidth: 850, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
-              <Typography>Each NFT corresponds to a new world in a finite universe; each with it's own resources and attributes. Drawn to the abundance of new energy
-                you have been cast into this void by your masters.
-              </Typography>
-              <Typography>
-                The values of the world correspond to: terrain type, the resource available, size, energy stream, structures, atmosphere, artifact and the energy accrued.
-              </Typography>
-            </div>
-          <div style={{ maxWidth: 850, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
-              {userSigner?(
-                <Button type={"primary"} onClick={()=>{
-                  tx( writeContracts.Worlds.mintItem({ value: mintprice.toString(), gasLimit: 3*10**7}))
-                }}>MINT FOR 0.05 ETHER</Button>
-              ):(
-                <Button type={"primary"} onClick={loadWeb3Modal}>CONNECT WALLET</Button>
-              )}
-
-            </div>
-            
-            
-              <List
+						<div class="wrapper">
+							<div class="inner" data-onvisible-trigger="1">
+								<p id="text01" class="style4">A new Universe Awaits</p>
+								<h1 id="text69" class="style2">Worlds</h1>
+								<p id="text73" class="style1"><span class="p">Cast into the void, you must gather the Energy of this new universe. It is the only way.</span><span class="p"><em>Worlds is a portfolio project by @lourenslinde. It is a Loot derivative and uses a gas-efficient ERC721 implementation.</em></span><span class="p"><strong>Proudly developed with Scaffold-Eth</strong></span></p>
+							</div>
+						</div>
+					<hr id="divider05" class="style1 full screen"></hr>
+					<div id="container02" data-scroll-id="one" data-scroll-behavior="center" data-scroll-offset="0" data-scroll-invisible="1" class="style1 container default">
+						<div class="wrapper">
+							<div class="inner" data-onvisible-trigger="1">
+								<h3 id="text04" class="style7">Discovered Worlds</h3>
+                <List
                 grid={{ gutter: 16, column: 3 }}
                 bordered
                 dataSource={yourCollectibles}
@@ -380,13 +372,7 @@ function App(props) {
                         </a>
                         <div>{item.description}</div>
                         <div>
-                        owner:{" "}
-                        <Address
-                          address={item.owner}
-                          ensProvider={mainnetProvider}
-                          blockExplorer={blockExplorer}
-                          fontSize={16}
-                        /></div>
+                        </div>
                         <div>
                         <Button
                           onClick={() => {
@@ -404,6 +390,45 @@ function App(props) {
                   );
                 }}
               />
+							</div>
+						</div>
+					</div>
+					<hr id="divider04" class="style1 full screen"></hr>
+					<div id="container03" data-scroll-id="two" data-scroll-behavior="center" data-scroll-offset="0" data-scroll-invisible="1" class="style1 container default">
+						<div class="wrapper">
+							<div class="inner" data-onvisible-trigger="1">
+								<h3 id="text13" class="style7">Mint Your Own</h3>
+								<p id="text14" class="style1">The Worlds universe lives on the Ethereum blockchain as ERC721 tokens. Energy extracted from each world is represented as an ERC20 token.</p>
+							</div>
+						</div>
+					</div>
+						<div class="wrapper">
+							<div class="inner" data-onvisible-trigger="1">
+								<h3 id="text03" class="style7">E 0.05</h3>
+                  {userSigner?(
+                <Button type={"primary"} onClick={()=>{
+                  tx( writeContracts.Worlds.mintItem({ value: mintprice.toString(), gasLimit: 3*10**7}))
+                }}>MINT FOR 0.05 ETHER</Button>
+              ):(
+                <Button type={"primary"} onClick={loadWeb3Modal}>CONNECT WALLET</Button>
+              )}
+							</div>
+					</div>
+					<hr id="divider03" class="style1 full screen"></hr>
+					<p id="text05" class="style3">© lourenslinde 2022. All rights reserved.</p>
+
+          <div style={{ maxWidth: 850, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
+              <Typography>Each NFT corresponds to a new world in a finite universe; each with it's own resources and attributes. Drawn to the abundance of new energy
+                you have been cast into this void by your masters.
+              </Typography>
+              <Typography>
+                The values of the world correspond to: terrain type, the resource available, size, energy stream, structures, atmosphere, artifact and the energy accrued.
+              </Typography>
+            </div>
+          <div style={{ maxWidth: 850, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
+              
+
+            </div>
           
           
         </Route>
