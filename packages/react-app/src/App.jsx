@@ -186,18 +186,26 @@ function App(props) {
   const yourBalance = balance && balance.toNumber && balance.toNumber();
   console.log(yourBalance);
 
+  //let ownersOfTokens = useContractReader(readContracts, "Worlds", "ownerOf", [1]);
+
+    //let ownerOfToken = useContractReader(readContracts, "Worlds", "ownerOf", [tokenIndex]);
+  //console.log("Owner of Token: "+ownersOfTokens);
+
+  const [worldCollectibles, setWorldCollectibles] = useState();
   const [yourCollectibles, setYourCollectibles] = useState();
 
   useEffect(() => {
-    const updateYourCollectibles = async () => {
+    const updateWorldCollectibles = async () => {
       const collectibleUpdate = [];
-      for (let tokenIndex = 0; tokenIndex < totalSupply; tokenIndex++) {
+      for (let tokenIndex = 1; tokenIndex <= totalSupply; tokenIndex++) {
         try {
           console.log("GEtting token index", tokenIndex);
           //const tokenId = await readContracts.Worlds.tokenOfOwnerByIndex(address, tokenIndex);
           //const testId = tokenId && balance.toNumber && balance.toNumber();
           console.log("tokenId", tokenIndex);
           const tokenURI = await readContracts.Worlds.tokenURI(tokenIndex);
+          const tokenOwner = await readContracts.Worlds.ownerOf(tokenIndex);
+          console.log("Owner of token: "+tokenOwner);
           const jsonManifestString = atob(tokenURI.substring(29))
           console.log("jsonManifestString", jsonManifestString);
 /*
@@ -208,12 +216,50 @@ function App(props) {
           try {
             const jsonManifest = JSON.parse(jsonManifestString);
             console.log("jsonManifest", jsonManifest);
-            collectibleUpdate.push({ id: tokenIndex, uri: tokenURI, owner: address, ...jsonManifest });
-            console.log({id: tokenIndex, uri: tokenURI, owner: address, ...jsonManifest});
+            collectibleUpdate.push({ id: tokenIndex, uri: tokenURI, owner: tokenOwner, ...jsonManifest });
+            console.log({id: tokenIndex, uri: tokenURI, owner: tokenOwner, ...jsonManifest});
           } catch (e) {
             console.log(e);
           }
 
+        } catch (e) {
+          console.log(e);
+        }
+      }
+      setWorldCollectibles(collectibleUpdate.reverse());
+    };
+    updateWorldCollectibles();
+
+    const updateYourCollectibles = async () => {
+      const collectibleUpdate = [];
+      for (let tokenIndex = 1; tokenIndex <= totalSupply; tokenIndex++) {
+        try {
+          console.log("GEtting token index", tokenIndex);
+          //const tokenId = await readContracts.Worlds.tokenOfOwnerByIndex(address, tokenIndex);
+          //const testId = tokenId && balance.toNumber && balance.toNumber();
+          console.log("tokenId", tokenIndex);
+          const tokenURI = await readContracts.Worlds.tokenURI(tokenIndex);
+          const tokenOwner = await readContracts.Worlds.ownerOf(tokenIndex);
+          console.log("Owner of token: "+tokenOwner);
+          const jsonManifestString = atob(tokenURI.substring(29))
+          console.log("jsonManifestString", jsonManifestString);
+/*
+          const ipfsHash = tokenURI.replace("https://ipfs.io/ipfs/", "");
+          console.log("ipfsHash", ipfsHash);
+          const jsonManifestBuffer = await getFromIPFS(ipfsHash);
+        */
+          if (tokenOwner == address) {
+            try {
+              const jsonManifest = JSON.parse(jsonManifestString);
+              console.log("jsonManifest", jsonManifest);
+              collectibleUpdate.push({ id: tokenIndex, uri: tokenURI, owner: tokenOwner, ...jsonManifest });
+              console.log({id: tokenIndex, uri: tokenURI, owner: tokenOwner, ...jsonManifest});
+            } catch (e) {
+              console.log(e);
+            }
+          }
+
+        
         } catch (e) {
           console.log(e);
         }
@@ -327,6 +373,9 @@ function App(props) {
         <Menu.Item key="/">
           <Link to="/">App Home</Link>
         </Menu.Item>
+        <Menu.Item key="/owned">
+          <Link to="/owned">Your Worlds</Link>
+        </Menu.Item>
         <Menu.Item key="/debug">
           <Link to="/debug">Debug Contracts</Link>
         </Menu.Item>
@@ -341,7 +390,8 @@ function App(props) {
 								<p id="text01" class="style4">A new Universe Awaits</p>
 								<h1 id="text69" class="style2">Worlds</h1>
                 <h1>🌍🌍🌍</h1>
-								<p id="text73" class="style1"><span class="p">Cast into the void, you must gather the Energy of this new universe. It is the only way.</span><span class="p"><em>Worlds is a portfolio project by @lourenslinde. It is a Loot derivative and uses a gas-efficient ERC721 implementation.</em></span><span class="p"><strong>Proudly developed with Scaffold-Eth</strong></span></p>
+								<p id="text73" class="style1"><span class="p">Cast into the void, you must gather the Energy of this new universe. It is the only way.</span><span class="p">
+                  <em>Worlds is a portfolio project by @lourenslinde. It is a Loot derivative and uses a gas-efficient ERC721 implementation.</em></span><span class="p"><strong>Proudly developed with Scaffold-Eth</strong></span></p>
 							</div>
 						</div>
 					<hr id="divider05" class="style1 full screen"></hr>
@@ -350,6 +400,7 @@ function App(props) {
 							<div class="inner" data-onvisible-trigger="1">
 								<h3 id="text13" class="style7">Mint Your Own</h3>
 								<p id="text14" class="style1">The Worlds universe lives on the Ethereum blockchain as ERC721 tokens. Energy extracted from each world is represented as an ERC20 token.</p>
+                <p id="text14" class="style1"> The values of the world correspond to: terrain type, the resource available, size, energy stream, structures, atmosphere, artifact and the energy accrued.</p>
 							</div>
 						</div>
 					</div>
@@ -370,11 +421,11 @@ function App(props) {
           <div id="container02" data-scroll-id="one" data-scroll-behavior="center" data-scroll-offset="0" data-scroll-invisible="1" class="style1 container default">
 						<div class="wrapper">
 							<div class="inner" data-onvisible-trigger="1">
-								<h3 id="text04" class="style7">Discovered Worlds</h3>
+								<h3 id="text04" class="style7">All Discovered Worlds</h3>
                 <List
                 grid={{ gutter: 16, column: 3 }}
                 bordered
-                dataSource={yourCollectibles}
+                dataSource={worldCollectibles}
                 renderItem={item => {
                   const id = item.id;
                   const tokenId = item.tokenId;
@@ -392,21 +443,12 @@ function App(props) {
                         }
                       >
                         <a href={"https://opensea.io/assets/"+(readContracts && readContracts.Worlds && readContracts.Worlds.address)+"/"+item.id} target="_blank">
-                        <img width={350} height={350} src={item.image} />
+                        <img src={item.image} />
                         </a>
-                        <div>{item.description}</div>
+                        <div><em>01100111 01100001 01110110 01101001 01110011 01110100 01101001</em></div>
                         <div>
                         </div>
-                        <div>
-                        <Button
-                          onClick={() => {
-                            console.log("writeContracts", writeContracts);
-                            tx(writeContracts.Worlds.claimTokens(address, tokenId));
-                          }}
-                        >
-                          Claim Energy
-                        </Button>
-                        </div>
+                        <p><em>Worlds NFT</em></p>
                       </Card>
 
                       
@@ -435,6 +477,68 @@ function App(props) {
           
           
         </Route>
+
+      {/*Your Worlds*/}
+      <Route exact path="/owned">
+          {/* pass in any web3 props to this Home component. For example, yourLocalBalance */}
+          <hr />
+						<div class="wrapper">
+							<div class="inner" data-onvisible-trigger="1">
+								<p id="text01" class="style4">How far are you willing to go?</p>
+								<h1 id="text69" class="style2">Your Worlds</h1>
+                <h1>🌍🌍🌍</h1>
+								</div>
+						</div>
+				
+
+                <List
+                grid={{ gutter: 16, column: 3 }}
+                bordered
+                dataSource={yourCollectibles}
+                renderItem={item => {
+                  const id = item.id;
+                  const tokenId = item.tokenId;
+
+                  console.log("IMAGE",item.image)
+                  console.log("Data", tokenId)
+
+                  return (
+                    <List.Item key={id + "_" + item.uri + "_" + item.owner}>
+                      <Card
+                        title={
+                          <div>
+                            <span style={{ fontSize: 18, marginRight: 8 }}>{item.name}</span>
+                          </div>
+                        }
+                      >
+                        <a href={"https://opensea.io/assets/"+(readContracts && readContracts.Worlds && readContracts.Worlds.address)+"/"+item.id} target="_blank">
+                        <img src={item.image} />
+                        </a>
+                        <div>{item.description}</div>
+                        <div>
+                        </div>
+                        <div>
+                        <Button
+                          onClick={() => {
+                            console.log("writeContracts", writeContracts);
+                            tx(writeContracts.Worlds.claimTokens(address, tokenId));
+                          }}
+                        >
+                          Claim Energy
+                        </Button>
+                        </div>
+                      </Card>
+
+                      
+                    </List.Item>
+                  );
+                }}
+              />
+
+					<hr id="divider03" class="style1 full screen"></hr>
+					<p id="text05" class="style3">© lourenslinde 2022. All rights reserved.</p>
+          </Route>
+
         <Route exact path="/debug">
           {/*
                 🎛 this scaffolding is full of commonly used components

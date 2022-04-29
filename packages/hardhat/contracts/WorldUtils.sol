@@ -2,7 +2,7 @@
 
 /// @title  Utility contract for Worlds NFTs
 /// @author @lourenslinde || lourens.eth
-/// @notice Contains necessary functions for Worlds NFTs
+/// @notice Contains supporting function for Worlds NFTs, specifically uint2str functionality
 pragma solidity >=0.8.0 <0.9.0;
 
 contract WorldUtils { 

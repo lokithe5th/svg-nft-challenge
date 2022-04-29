@@ -3,26 +3,38 @@
 /// @notice   This contract controls the "Worlds" NFT collection and associated token actions
 /// @dev      The contract splits functionality between WorldGen and WorldUtils
 /// @custom   Credit goes to Loot, for the inspiration, and Austin Griffith / BuidlGuidl for the challenge. 
+
 pragma solidity >=0.8.0 <0.9.0;
 //SPDX-License-Identifier: MIT
+
+//                                    \\\\\\\\\\\\\\\\\\\\\
+//              //                            \\\\\\\\\\\\\
+//              ///                                \\\\\\\\
+//              /////               *                 \\\\\
+//              ////////                                \\\
+//              /////////////                            \\
+//              /////////////////////
+
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-//import "@openzeppelin/contracts/utils/Strings.sol";
 import 'base64-sol/base64.sol';
 import "./WorldGen.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract Worlds is ERC721, Ownable, WorldGenerator {
 
-  //using Strings for uint256;
+  //  Using a counter to negate need for ERC721Enumerable, which increases gas costs for collection
   using Counters for Counters.Counter;
   Counters.Counter public _tokenIds;
+  //  Interface for the Energy token which is emitted by the "Worlds" NFTs
   IERC20 private energyToken;
+  //  Init variable for setting token
   bool private init;
 
   constructor() ERC721("Worlds", "WORLDS") { 
+    //  Note that incrementing the counter in the constructor costs slightly more gas on deployment, but results in lower gas costs
     _tokenIds.increment();
    }
 
@@ -34,29 +46,6 @@ contract Worlds is ERC721, Ownable, WorldGenerator {
         energyToken = IERC20(tokenAddress);
         init = true;
   }
-  
-    /// @notice Allows NFT holder to claim tokens
-    /// @dev    Checks an NFT for Energy and transfers Energy from the Worlds contract to the recipient
-    /// @param  to Address where the tokens must be transferred
-    /// @param  tokenId The id of the NFT being drained
-    function claimTokens(
-    address payable to, 
-    uint256 tokenId) 
-    public {
-      require(init,"!init");
-      require(msg.sender == ownerOf(tokenId),"!owner");
-      require(energyToken.transfer(to, (block.timestamp - lastExtraction[tokenId]) / 1 minutes), "failed");
-      lastExtraction[tokenId] = block.timestamp;
-  }
-
-    
-    /// @notice Pays out the funds in the contract
-    /// @param  to The address where funds should be sent
-    /// @param  amount The amount (in wei) which should be paid out to target address
-    function payOut(address payable to, uint256 amount) public payable {
-        (bool success, )= to.call{value: amount}("");
-    }
-
 
   /// @notice Mint function for Worlds NFT
   /// @dev    Checks if msg.value is greater than or equal to the asking price
@@ -67,8 +56,6 @@ contract Worlds is ERC721, Ownable, WorldGenerator {
     returns (uint256) {
       require(msg.value >= 0.05 ether, "!funds");
       require(_tokenIds.current() < 64, "!supply");
-
-      //uint256 id = ;
 
       properties[_tokenIds.current()] = predictableRandom();
       _mint(msg.sender, _tokenIds.current());
@@ -87,7 +74,6 @@ contract Worlds is ERC721, Ownable, WorldGenerator {
     override 
     returns (string memory) {
       require(_exists(id), "!exist");
-      //string memory output = generateSVGofTokenById(id);
 
       string memory json = Base64.encode(
         bytes(string(abi.encodePacked(
@@ -107,6 +93,29 @@ contract Worlds is ERC721, Ownable, WorldGenerator {
     //string memory render = ;
     return string(abi.encodePacked(generateSVGofTokenById(id)));
   }
+
+    /// @notice Allows NFT holder to claim tokens
+    /// @dev    Checks an NFT for Energy and transfers Energy from the Worlds contract to the recipient
+    /// @param  to Address where the tokens must be transferred
+    /// @param  tokenId The id of the NFT being drained
+    function claimTokens(
+    address payable to, 
+    uint256 tokenId) 
+    public {
+      require(init,"!init");
+      require(msg.sender == ownerOf(tokenId),"!owner");
+      //  Energy is emitted at the World Energy Level, on a per minute basis
+      require(energyToken.transfer(to, getEnergyLevel(tokenId)*(block.timestamp - lastExtraction[tokenId]) / 1 minutes), "failed");
+      //  Once Energy is extracted from a World, it has to build up again.
+      lastExtraction[tokenId] = block.timestamp;
+  }
+
+    /// @notice Pays out the funds in the contract
+    /// @param  to The address where funds should be sent
+    /// @param  amount The amount (in wei) which should be paid out to target address
+    function payOut(address payable to, uint256 amount) public payable onlyOwner() {
+        (bool success, )= to.call{value: amount}("");
+    }
 
   //  Generic receive function to allow the reception of tokens
   receive() payable external {}

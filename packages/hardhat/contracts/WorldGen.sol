@@ -25,6 +25,7 @@ contract WorldGenerator is WorldStorage, WorldUtils {
       return keccak256(abi.encodePacked( blockhash(block.number-1), msg.sender, address(this) ));
   } 
 
+  //  These "get" functions are public to allow for other contracts to read the properties of Worlds
   //  Type of environment
   function getType(uint256 tokenId) 
     public 
@@ -118,13 +119,6 @@ contract WorldGenerator is WorldStorage, WorldUtils {
         return sourceArray[uint256(keccak256(abi.encodePacked(keyPrefix, properties[tokenId]))) % sourceArray.length];
     }
 
-  /// @notice Amount of energy the target world has generated
-  /// @param  id Token id of the target world
-  /// @return uint256 Amount of energy the world has amassed
-  //function worldEnergy(uint256 id) internal view returns (uint256) {
-  //  return ((block.timestamp - lastExtraction[id]) / 1 minutes)*(getEnergyLevel(id)/100);
-  //}
-
   /// @notice Generates SVG image for a given token id
   /// @param  id Target World
   /// @return string Representation of the SVG image in string format
@@ -132,11 +126,7 @@ contract WorldGenerator is WorldStorage, WorldUtils {
     public 
     view 
     returns (string memory) {
-
-        /*string memory svg = string(abi.encodePacked(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7], parts[8]));
-        svg = string(abi.encodePacked(svg, parts[9], parts[10], parts[11], parts[12], parts[13], parts[14], parts[15], parts[16], parts[17]));
-      */
-      
+        //  Why sacrifice readability here? Because adding another string memory variable creates contract bloat, leading to increased gas costs.
         string memory svg = string(abi.encodePacked(svgParts[0], getType(id), svgParts[1], getResource(id), svgParts[2], uint2str(getSize(id)), svgParts[3], uint2str(getEnergyLevel(id)), svgParts[4]));
         svg = string(abi.encodePacked(svg, getArtifact(id), svgParts[5], getAtmosphere(id), svgParts[6], getObject(id), svgParts[7], uint2str(((block.timestamp - lastExtraction[id]) / 1 minutes)*(getEnergyLevel(id)/100)), svgParts[8], svgParts[9]));
     return svg;
