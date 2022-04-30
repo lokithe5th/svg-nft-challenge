@@ -33,6 +33,10 @@ contract Worlds is ERC721, Ownable, WorldGenerator {
   //  Init variable for setting token
   bool private init;
 
+  //  Events
+  event energyExtracted(address _extractor, uint256 _tokenId, uint256 _amount);
+  event paidOut(address _to, uint256 _amount);
+
   constructor() ERC721("Worlds", "WORLDS") { 
     //  Note that incrementing the counter in the constructor costs slightly more gas on deployment, but results in lower gas costs
     _tokenIds.increment();
@@ -106,8 +110,10 @@ contract Worlds is ERC721, Ownable, WorldGenerator {
       require(msg.sender == ownerOf(tokenId),"!owner");
       //  Energy is emitted at the World Energy Level, on a per minute basis
       require(energyToken.transfer(to, getEnergyLevel(tokenId)*(block.timestamp - lastExtraction[tokenId]) / 1 minutes), "failed");
+      emit energyExtracted(msg.sender, tokenId, getEnergyLevel(tokenId)*(block.timestamp - lastExtraction[tokenId]) / 1 minutes);
       //  Once Energy is extracted from a World, it has to build up again.
       lastExtraction[tokenId] = block.timestamp;
+      
   }
 
     /// @notice Pays out the funds in the contract
@@ -115,6 +121,7 @@ contract Worlds is ERC721, Ownable, WorldGenerator {
     /// @param  amount The amount (in wei) which should be paid out to target address
     function payOut(address payable to, uint256 amount) public payable onlyOwner() {
         (bool success, )= to.call{value: amount}("");
+        emit paidOut(to, amount);
     }
 
   //  Generic receive function to allow the reception of tokens

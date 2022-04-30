@@ -39,7 +39,8 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   // Getting a previously deployed contract
   const EnergyToken = await ethers.getContract("EnergyToken", deployer);
   
-  await Worlds.transferOwnership(****);
+  await Worlds.transferOwnership("0x809F55D088872FFB148F86b5C21722CAa609Ac72");
+  await Worlds.initToken(EnergyToken.address);
   /*  await YourContract.setPurpose("Hello");
 
   

@@ -26,7 +26,7 @@ import {
   FaucetHint,
   NetworkSwitch,
 } from "./components";
-import { NETWORKS, ALCHEMY_KEY } from "./constants";
+import { NETWORKS, ALCHEMY_KEY, NETWORK } from "./constants";
 import externalContracts from "./contracts/external_contracts";
 // contracts
 import deployedContracts from "./contracts/hardhat_contracts.json";
@@ -48,6 +48,8 @@ const { ethers } = require("ethers");
     You should get your own Alchemy.com & Infura.io ID and put it in `constants.js`
     (this is your connection to the main Ethereum network for ENS etc.)
 
+    0x4f7dd11B9c5eE9C79eecfF2127bCFf153e0eA49F
+    0xDfDDA54eA89889ca66A7eb4f61C9fA0A635c1218
 
     🌏 EXTERNAL CONTRACTS:
     You can also bring in contract artifacts in `constants.js`
@@ -55,7 +57,7 @@ const { ethers } = require("ethers");
 */
 
 /// 📡 What chain are your contracts deployed to?
-const initialNetwork = NETWORKS.localhost; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
+const initialNetwork = NETWORKS.kovan; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
 
 // 😬 Sorry for all the console logging
 const DEBUG = true;
@@ -82,7 +84,7 @@ function App(props) {
   const [selectedNetwork, setSelectedNetwork] = useState(networkOptions[0]);
   const location = useLocation();
 
-  const targetNetwork = NETWORKS[selectedNetwork];
+  const targetNetwork = NETWORKS["kovan"];
 
   // 🔭 block explorer URL
   const blockExplorer = targetNetwork.blockExplorer;
@@ -145,18 +147,19 @@ function App(props) {
 
   // const contractConfig = useContractConfig();
 
-  const contractConfig = { deployedContracts: deployedContracts || {}, externalContracts: externalContracts || {} };
+  const contractConfig = { deployedContracts: deployedContracts };
 
   // Load in your local 📝 contract and read a value from it:
-  const readContracts = useContractLoader(localProvider, contractConfig);
+  //const readContracts = useContractLoader(mainnetProvider, contractConfig, 42);
 
   // If you want to make 🔐 write transactions to your contracts, use the userSigner:
-  const writeContracts = useContractLoader(userSigner, contractConfig, localChainId);
+  const writeContracts = useContractLoader(userSigner, contractConfig, 42);
 
   // EXTERNAL CONTRACT EXAMPLE:
   //
   // If you want to bring in the mainnet DAI contract it would look like:
-  const mainnetContracts = useContractLoader(mainnetProvider, contractConfig);
+  const mainnetContracts = useContractLoader(localProvider, contractConfig, 42);
+  console.log(mainnetContracts);
 
   // If you want to call a function on a new block
   useOnBlock(mainnetProvider, () => {
@@ -164,10 +167,11 @@ function App(props) {
   });
 
   // Then read your DAI balance like:
-  const myMainnetDAIBalance = useContractReader(mainnetContracts, "DAI", "balanceOf", [
-    "0x34aA3F359A9D614239015126635CE7732c18fDF3",
-  ]);
+  //const myMainnetDAIBalance = useContractReader(mainnetContracts, "DAI", "balanceOf", [
+ //   "0x34aA3F359A9D614239015126635CE7732c18fDF3",
+ // ]);
 
+  const readContracts = mainnetContracts;
   // keep track of a variable from the contract in the local React state:
   //const purpose = useContractReader(readContracts, "YourContract", "purpose");
 
@@ -179,12 +183,12 @@ function App(props) {
   console.log("Readcontract is "+readContracts);
 
   
-  const balance = useContractReader(readContracts, "Worlds", "balanceOf", [address]);
-  const totalSupplyBig = useContractReader(readContracts, "Worlds", "_tokenIds", []);
+  const balance = useContractReader(mainnetContracts, "Worlds", "balanceOf", [address]);
+  const totalSupplyBig = useContractReader(mainnetContracts, "Worlds", "_tokenIds");
   const totalSupply = (totalSupplyBig && totalSupplyBig.toNumber && totalSupplyBig.toNumber())-1;
   console.log("🤗 totalSupply:", totalSupply);
   const yourBalance = balance && balance.toNumber && balance.toNumber();
-  console.log(yourBalance);
+  console.log(balance);
 
   //let ownersOfTokens = useContractReader(readContracts, "Worlds", "ownerOf", [1]);
 
@@ -203,8 +207,8 @@ function App(props) {
           //const tokenId = await readContracts.Worlds.tokenOfOwnerByIndex(address, tokenIndex);
           //const testId = tokenId && balance.toNumber && balance.toNumber();
           console.log("tokenId", tokenIndex);
-          const tokenURI = await readContracts.Worlds.tokenURI(tokenIndex);
-          const tokenOwner = await readContracts.Worlds.ownerOf(tokenIndex);
+          const tokenURI = await mainnetContracts.Worlds.tokenURI(tokenIndex);
+          const tokenOwner = await mainnetContracts.Worlds.ownerOf(tokenIndex);
           console.log("Owner of token: "+tokenOwner);
           const jsonManifestString = atob(tokenURI.substring(29))
           console.log("jsonManifestString", jsonManifestString);
@@ -238,8 +242,8 @@ function App(props) {
           //const tokenId = await readContracts.Worlds.tokenOfOwnerByIndex(address, tokenIndex);
           //const testId = tokenId && balance.toNumber && balance.toNumber();
           console.log("tokenId", tokenIndex);
-          const tokenURI = await readContracts.Worlds.tokenURI(tokenIndex);
-          const tokenOwner = await readContracts.Worlds.ownerOf(tokenIndex);
+          const tokenURI = await mainnetContracts.Worlds.tokenURI(tokenIndex);
+          const tokenOwner = await mainnetContracts.Worlds.ownerOf(tokenIndex);
           console.log("Owner of token: "+tokenOwner);
           const jsonManifestString = atob(tokenURI.substring(29))
           console.log("jsonManifestString", jsonManifestString);
@@ -291,8 +295,8 @@ function App(props) {
       console.log("💵 yourLocalBalance", yourLocalBalance ? ethers.utils.formatEther(yourLocalBalance) : "...");
       console.log("💵 yourMainnetBalance", yourMainnetBalance ? ethers.utils.formatEther(yourMainnetBalance) : "...");
       console.log("📝 readContracts", readContracts);
-      console.log("🌍 DAI contract on mainnet:", mainnetContracts);
-      console.log("💵 yourMainnetDAIBalance", myMainnetDAIBalance);
+      //console.log("🌍 DAI contract on mainnet:", mainnetContracts);
+      //console.log("💵 yourMainnetDAIBalance", myMainnetDAIBalance);
       console.log("🔐 writeContracts", writeContracts);
     }
   }, [
@@ -305,7 +309,7 @@ function App(props) {
     writeContracts,
     mainnetContracts,
     localChainId,
-    myMainnetDAIBalance,
+    //myMainnetDAIBalance,
   ]);
 
 
@@ -391,7 +395,9 @@ function App(props) {
 								<h1 id="text69" class="style2">Worlds</h1>
                 <h1>🌍🌍🌍</h1>
 								<p id="text73" class="style1"><span class="p">Cast into the void, you must gather the Energy of this new universe. It is the only way.</span><span class="p">
-                  <em>Worlds is a portfolio project by @lourenslinde. It is a Loot derivative and uses a gas-efficient ERC721 implementation.</em></span><span class="p"><strong>Proudly developed with Scaffold-Eth</strong></span></p>
+                  <em>Worlds is a portfolio project by @lourenslinde.</em><br></br><em>The NFT uses a gas efficient implementation of ERC721 by avoiding ERC721Enumerable and using custom solutions to reproduce the same functionality.</em></span><span class="p"><strong>Proudly developed with Scaffold-Eth</strong></span></p>
+                  <p><span class="p"><strong><a href="https://kovan.etherscan.io/address/0x4f7dd11B9c5eE9C79eecfF2127bCFf153e0eA49F#code">Worlds Contract Address</a></strong></span></p>
+                  <p><span class="p"><strong><a href="https://kovan.etherscan.io/address/0xDfDDA54eA89889ca66A7eb4f61C9fA0A635c1218#code">Energy Token Contract Address</a></strong></span></p>
 							</div>
 						</div>
 					<hr id="divider05" class="style1 full screen"></hr>
@@ -400,6 +406,7 @@ function App(props) {
 							<div class="inner" data-onvisible-trigger="1">
 								<h3 id="text13" class="style7">Mint Your Own</h3>
 								<p id="text14" class="style1">The Worlds universe lives on the Ethereum blockchain as ERC721 tokens. Energy extracted from each world is represented as an ERC20 token.</p>
+                <p class="style1"><em>Please refresh your browser after a few minutes to reveal your Worlds NFT</em></p>
                 <p id="text14" class="style1"> The values of the world correspond to: terrain type, the resource available, size, energy stream, structures, atmosphere, artifact and the energy accrued.</p>
 							</div>
 						</div>
@@ -460,21 +467,7 @@ function App(props) {
 						</div>
 					</div>
 					<hr id="divider03" class="style1 full screen"></hr>
-					<p id="text05" class="style3">© lourenslinde 2022. All rights reserved.</p>
-
-          <div style={{ maxWidth: 850, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
-              <Typography>Each NFT corresponds to a new world in a finite universe; each with it's own resources and attributes. Drawn to the abundance of new energy
-                you have been cast into this void by your masters.
-              </Typography>
-              <Typography>
-                The values of the world correspond to: terrain type, the resource available, size, energy stream, structures, atmosphere, artifact and the energy accrued.
-              </Typography>
-            </div>
-          <div style={{ maxWidth: 850, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
-              
-
-            </div>
-          
+					<p id="text05" class="style3">© lourenslinde 2022. All rights reserved.</p>         
           
         </Route>
 
@@ -487,6 +480,7 @@ function App(props) {
 								<p id="text01" class="style4">How far are you willing to go?</p>
 								<h1 id="text69" class="style2">Your Worlds</h1>
                 <h1>🌍🌍🌍</h1>
+                <p>⚡Claim Your World's energy below⚡</p>
 								</div>
 						</div>
 				

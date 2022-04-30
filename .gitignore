@@ -3,6 +3,8 @@ packages/subgraph/generated
 packages/subgraph/abis/*
 packages/hardhat/*.txt
 **/aws.json
+packages/hardhat/mnemonic.txt
+packages/hardhat/0xd7d7c1d5ddae7290fd23a7d17dc7b4141366925e.txt
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 **/node_modules
