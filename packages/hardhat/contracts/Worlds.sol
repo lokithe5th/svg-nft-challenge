@@ -58,8 +58,8 @@ contract Worlds is ERC721, Ownable, WorldGenerator {
     public 
     payable 
     returns (uint256) {
-      require(msg.value >= 0.05 ether, "!funds");
-      require(_tokenIds.current() < 64, "!supply");
+      require(msg.value >= 0.02 ether, "!funds");
+      require(_tokenIds.current() < 69, "!supply");
 
       properties[_tokenIds.current()] = predictableRandom();
       _mint(msg.sender, _tokenIds.current());
@@ -119,9 +119,10 @@ contract Worlds is ERC721, Ownable, WorldGenerator {
     /// @notice Pays out the funds in the contract
     /// @param  to The address where funds should be sent
     /// @param  amount The amount (in wei) which should be paid out to target address
-    function payOut(address payable to, uint256 amount) public payable onlyOwner() {
+    function payOut(address payable to, uint256 amount) public payable onlyOwner() returns (bool) {
         (bool success, )= to.call{value: amount}("");
         emit paidOut(to, amount);
+        return success;
     }
 
   //  Generic receive function to allow the reception of tokens

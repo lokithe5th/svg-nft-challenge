@@ -51,13 +51,17 @@ const { ethers } = require("ethers");
     0x4f7dd11B9c5eE9C79eecfF2127bCFf153e0eA49F
     0xDfDDA54eA89889ca66A7eb4f61C9fA0A635c1218
 
+    Opt
+    Woprlds 0x4f7dd11B9c5eE9C79eecfF2127bCFf153e0eA49F
+    Energy 0xDfDDA54eA89889ca66A7eb4f61C9fA0A635c1218
+
     🌏 EXTERNAL CONTRACTS:
     You can also bring in contract artifacts in `constants.js`
     (and then use the `useExternalContractLoader()` hook!)
 */
 
 /// 📡 What chain are your contracts deployed to?
-const initialNetwork = NETWORKS.kovan; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
+const initialNetwork = NETWORKS.optimism; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
 
 // 😬 Sorry for all the console logging
 const DEBUG = true;
@@ -77,14 +81,14 @@ const providers = [
 function App(props) {
   // specify all the chains your app is available on. Eg: ['localhost', 'mainnet', ...otherNetworks ]
   // reference './constants.js' for other networks
-  const networkOptions = [initialNetwork.name, "mainnet", "rinkeby"];
+  const networkOptions = [initialNetwork.name, "kovanOptimism", "kovan"];
 
   const [injectedProvider, setInjectedProvider] = useState();
   const [address, setAddress] = useState();
   const [selectedNetwork, setSelectedNetwork] = useState(networkOptions[0]);
   const location = useLocation();
 
-  const targetNetwork = NETWORKS["kovan"];
+  const targetNetwork = NETWORKS["optimism"];
 
   // 🔭 block explorer URL
   const blockExplorer = targetNetwork.blockExplorer;
@@ -153,12 +157,12 @@ function App(props) {
   //const readContracts = useContractLoader(mainnetProvider, contractConfig, 42);
 
   // If you want to make 🔐 write transactions to your contracts, use the userSigner:
-  const writeContracts = useContractLoader(userSigner, contractConfig, 42);
+  const writeContracts = useContractLoader(userSigner, contractConfig, targetNetwork.chainId);
 
   // EXTERNAL CONTRACT EXAMPLE:
   //
   // If you want to bring in the mainnet DAI contract it would look like:
-  const mainnetContracts = useContractLoader(localProvider, contractConfig, 42);
+  const mainnetContracts = useContractLoader(localProvider, contractConfig, targetNetwork.chainId);
   console.log(mainnetContracts);
 
   // If you want to call a function on a new block
@@ -358,7 +362,7 @@ function App(props) {
     width: '25%',
     textAlign: 'center',
   }
-  const mintprice = 5*10**16;
+  const mintprice = 2*10**16;
   //console.log(yourCollectibles);
 
   return (
@@ -396,8 +400,8 @@ function App(props) {
                 <h1>🌍🌍🌍</h1>
 								<p id="text73" class="style1"><span class="p">Cast into the void, you must gather the Energy of this new universe. It is the only way.</span><span class="p">
                   <em>Worlds is a portfolio project by @lourenslinde.</em><br></br><em>The NFT uses a gas efficient implementation of ERC721 by avoiding ERC721Enumerable and using custom solutions to reproduce the same functionality.</em></span><span class="p"><strong>Proudly developed with Scaffold-Eth</strong></span></p>
-                  <p><span class="p"><strong><a href="https://kovan.etherscan.io/address/0x4f7dd11B9c5eE9C79eecfF2127bCFf153e0eA49F#code">Worlds Contract Address</a></strong></span></p>
-                  <p><span class="p"><strong><a href="https://kovan.etherscan.io/address/0xDfDDA54eA89889ca66A7eb4f61C9fA0A635c1218#code">Energy Token Contract Address</a></strong></span></p>
+                  <p><span class="p"><strong><a href="https://optimistic.etherscan.io/address/0x4f7dd11B9c5eE9C79eecfF2127bCFf153e0eA49F#code">Worlds Contract Address</a></strong></span></p>
+                  <p><span class="p"><strong><a href="https://optimistic.etherscan.io/address/0xDfDDA54eA89889ca66A7eb4f61C9fA0A635c1218#code">Energy Token Contract Address</a></strong></span></p>
 							</div>
 						</div>
 					<hr id="divider05" class="style1 full screen"></hr>
@@ -416,8 +420,8 @@ function App(props) {
 							<div class="inner" data-onvisible-trigger="1">
                   {userSigner?(
                 <Button type={"primary"} onClick={()=>{
-                  tx( writeContracts.Worlds.mintItem({ value: mintprice.toString(), gasLimit: 3*10**7}))
-                }}>MINT FOR 0.05 ETHER</Button>
+                  tx( writeContracts.Worlds.mintItem({ value: mintprice.toString()}))
+                }}>MINT FOR 0.02 OE</Button>
               ):(
                 <Button type={"primary"} onClick={loadWeb3Modal}>CONNECT WALLET</Button>
               )}

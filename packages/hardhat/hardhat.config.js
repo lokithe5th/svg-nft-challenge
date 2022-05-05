@@ -295,7 +295,8 @@ module.exports = {
   etherscan: {
     apiKey: {
       mainnet: "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW",
-      kovan: "A93198DXZCATMIY5D79ECVWIVTTNPPUR9G"
+      kovan: "A93198DXZCATMIY5D79ECVWIVTTNPPUR9G",
+      optimisticEthereum: "WXFPNUEB4V34A4CCITQWQ1D1KGK4DQRYDR"
       // add other network's API key here
     },
   },

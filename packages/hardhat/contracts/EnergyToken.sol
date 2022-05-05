@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 contract EnergyToken is ERC20 {
 
     constructor(address recipient) ERC20("WorldEnergy", "ENRGY") {
-        _mint(recipient, 100000 * 10 ** decimals());
+        _mint(recipient, 300000 * 10 ** decimals());
     }
 
 }
